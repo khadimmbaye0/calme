@@ -226,7 +226,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
+    <section className="min-w-0 rounded-2xl border border-line bg-paper p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Projets</p>
@@ -415,8 +415,8 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
             ← Tous les projets
           </button>
 
-          <h3 className="mt-3 font-serif text-2xl leading-tight">{selected.title}</h3>
-          <p className="mt-1 text-sm leading-relaxed text-ink/55">{selected.goal}</p>
+          <h3 className="mt-3 break-words font-serif text-2xl leading-tight">{selected.title}</h3>
+          <p className="mt-1 break-words text-sm leading-relaxed text-ink/55">{selected.goal}</p>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink/45">
             <span>Échéance {formatDate(selected.deadline)}</span>
             <span>Marge {Math.round(selected.bufferRatio * 100)} %</span>
@@ -432,8 +432,8 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
             {selected.steps.map((step) => (
               <div key={step.taskId} className="rounded-2xl border border-line bg-wash/50 p-3">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium">{step.title}</p>
+                  <div className="min-w-0">
+                    <p className="break-words text-sm font-medium">{step.title}</p>
                     <p className="mt-1 text-xs text-ink/45">
                       {step.estimateMax} min · {STATUS_LABELS[step.status] ?? step.status}
                     </p>
@@ -485,13 +485,13 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                   className="w-full rounded-2xl border border-line bg-wash/50 p-4 text-left hover:border-ink/30"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium">{project.title}</p>
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-medium">{project.title}</p>
                       <p className="mt-1 text-xs text-ink/45">
                         Échéance {formatDate(project.deadline)} · {project.doneSteps}/{project.totalSteps} étapes
                       </p>
                     </div>
-                    <span className="text-xs text-ink/45">{Math.round(project.progress * 100)} %</span>
+                    <span className="shrink-0 text-xs text-ink/45">{Math.round(project.progress * 100)} %</span>
                   </div>
                   <div className="mt-3">
                     <ProgressBar value={project.progress} />

@@ -17,7 +17,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
 - Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
 - Agent (F4) : chat en langage naturel, outils calendrier/tâches/projets/énergie/journal, confirmations pour les suppressions et les plans volumineux, journal/undo.
-- Interface minimaliste : papier chaud, titres Fraunces, cartes filaires, aucune animation décorative ; les changements d'état sont instantanés.
+- Interface minimaliste et responsive de 320 px au desktop : papier chaud, titres Fraunces, cartes filaires, chat et formulaires sans débordement, timeline mobile défilante, aucune animation décorative.
 - Déploiement en une commande : `./scripts/up.sh` ou `make up`, avec healthchecks, génération des secrets locaux et port frontend unique.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.

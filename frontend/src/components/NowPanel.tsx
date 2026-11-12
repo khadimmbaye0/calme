@@ -158,7 +158,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
   const blockLabel = now?.blockType ? BLOCK_LABELS[now.blockType] : 'Hors bloc'
 
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 lg:sticky lg:top-8">
+    <section className="min-w-0 rounded-2xl border border-line bg-paper p-5 lg:sticky lg:top-8">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Maintenant</p>
         <span className="text-[11px] text-ink/35">{blockLabel}</span>
@@ -205,7 +205,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
           {startedTask ? (
             <>
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sage">En cours</p>
-              <h2 className="mt-2 font-serif text-2xl leading-tight">{startedTask.title}</h2>
+              <h2 className="mt-2 break-words font-serif text-2xl leading-tight">{startedTask.title}</h2>
               <p className="mt-2 text-sm text-ink/50">{startedTask.estimateMax} min</p>
               <button
                 type="button"
@@ -219,7 +219,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
           ) : now.task ? (
             <>
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-terracotta">Une chose</p>
-              <h2 className="mt-2 font-serif text-2xl leading-tight">{now.task.title}</h2>
+              <h2 className="mt-2 break-words font-serif text-2xl leading-tight">{now.task.title}</h2>
               <p className="mt-2 text-sm text-ink/50">
                 {now.task.estimateMax} min · {PRIORITY_LABELS[now.task.priority]}
               </p>

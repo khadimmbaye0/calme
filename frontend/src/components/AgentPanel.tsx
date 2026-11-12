@@ -199,7 +199,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
+    <section className="min-w-0 rounded-2xl border border-line bg-paper p-5 sm:p-6">
       <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Agent</p>
       <h2 className="mt-1 font-serif text-2xl leading-tight">Parle à Calme.</h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink/50">
@@ -208,7 +208,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
 
       <div
         ref={transcriptRef}
-        className="mt-5 max-h-[28rem] space-y-4 overflow-y-auto pr-1"
+        className="mt-5 min-w-0 max-h-[45vh] space-y-4 overflow-y-auto pr-1 sm:max-h-[28rem]"
         aria-live="polite"
       >
         {loading && <p className="text-sm text-ink/50">Chargement de la conversation…</p>}
@@ -236,7 +236,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={message.role === 'USER' ? 'ml-auto max-w-[88%]' : 'max-w-[92%]'}
+            className={`min-w-0 ${message.role === 'USER' ? 'ml-auto max-w-[88%]' : 'max-w-[92%]'}`}
           >
             <p className="mb-1 text-[10px] uppercase tracking-[0.16em] text-ink/35">
               {message.role === 'USER' ? 'Vous' : 'Calme'} · {formatTime(message.createdAt)}
@@ -244,8 +244,8 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
             <div
               className={
                 message.role === 'USER'
-                  ? 'rounded-xl bg-wash px-4 py-3 text-sm leading-relaxed text-ink/80'
-                  : 'text-sm leading-relaxed text-ink/80'
+                  ? 'break-words rounded-xl bg-wash px-4 py-3 text-sm leading-relaxed text-ink/80'
+                  : 'break-words text-sm leading-relaxed text-ink/80'
               }
             >
               {message.content}
@@ -255,7 +255,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
 
         {pending && (
           <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4">
-            <p className="text-sm leading-relaxed text-ink/80">{pending.summary}</p>
+            <p className="break-words text-sm leading-relaxed text-ink/80">{pending.summary}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -283,7 +283,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
       {actions.length > 0 && (
         <div className="mt-4 space-y-1 border-t border-line pt-3">
           {actions.map((action) => (
-            <p key={`${action.tool}-${action.summary}`} className="text-xs text-ink/50">
+            <p key={`${action.tool}-${action.summary}`} className="break-words text-xs text-ink/50">
               · {action.summary}
             </p>
           ))}
@@ -291,11 +291,11 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
       )}
 
       {error && (
-        <p role="status" className="mt-3 text-sm leading-relaxed text-terracotta">
+        <p role="status" className="mt-3 break-words text-sm leading-relaxed text-terracotta">
           {error}
         </p>
       )}
-      {notice && <p className="mt-3 text-xs text-ink/50">{notice}</p>}
+      {notice && <p className="mt-3 break-words text-xs text-ink/50">{notice}</p>}
 
       {undoableActionId !== null && (
         <button
@@ -321,16 +321,16 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
           maxLength={2000}
           disabled={sending || pending !== null}
           placeholder="Par exemple : ajoute un cours demain à 9h…"
-          className="w-full resize-none rounded-xl border border-line bg-wash px-3 py-2.5 text-sm leading-relaxed text-ink outline-none placeholder:text-ink/30 focus:border-terracotta/50 disabled:opacity-60"
+          className="min-w-0 w-full resize-none rounded-xl border border-line bg-wash px-3 py-2.5 text-sm leading-relaxed text-ink outline-none placeholder:text-ink/30 focus:border-terracotta/50 disabled:opacity-60"
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] text-ink/35">
+          <p className="hidden text-[11px] text-ink/35 sm:block">
             Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne
           </p>
           <button
             type="submit"
             disabled={sending || input.trim().length === 0 || pending !== null}
-            className="rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-40"
+            className="ml-auto rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-40"
           >
             {sending ? 'Envoi…' : 'Envoyer'}
           </button>
