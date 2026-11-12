@@ -62,7 +62,7 @@ public class NowService {
         BlockType blockType = blocks.currentType(user, today).orElse(null);
 
         AvailabilityWindow window = PlannerRules.availabilityFor(today, blockType);
-        List<BusyInterval> busy = fixedEvents(user, today, zone);
+        List<BusyInterval> busy = busyEvents(user, today, zone);
         List<PlannerTask> candidates = tasks
                 .findByUserIdAndStatusAndDueDateLessThanEqualOrderByPriorityAscDueDateAscEstimateMaxAsc(
                         user.getId(), TaskStatus.TODO, today)
@@ -126,14 +126,14 @@ public class NowService {
                 message);
     }
 
-    private List<BusyInterval> fixedEvents(AppUser user, LocalDate today, ZoneId zone) {
+    private List<BusyInterval> busyEvents(AppUser user, LocalDate today, ZoneId zone) {
         Instant dayStart = today.atStartOfDay(zone).toInstant();
         Instant dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant();
         return events
                 .findByUserIdAndStartAtLessThanAndEndAtGreaterThanOrderByStartAtAsc(
                         user.getId(), dayEnd, dayStart)
                 .stream()
-                .filter(event -> event.getKind() == EventKind.FIXED)
+                .filter(event -> event.getKind() != EventKind.AVAILABILITY)
                 .map(event -> new BusyInterval(event.getStartAt(), event.getEndAt()))
                 .toList();
     }

@@ -39,11 +39,19 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 
 - Capacité planifiable : 60 % en énergie bonne, 40 % en énergie moyenne, 30 % en énergie basse.
 - Disponibilités par défaut du MVP : en semaine, école 17:30–22:00 et entreprise 18:30–22:00 ; le week-end 09:00–22:00. La journée planifiée s'arrête avant les heures de repos (22:30). Ces valeurs sont codées, réversibles et seront éditables dans les réglages.
-- L'écran « Maintenant » propose une seule tâche due aujourd'hui : 25 minutes maximum, titre de 80 caractères maximum, priorité la plus haute, créneau libre après l'heure courante et hors événements `FIXED`.
+- L'écran « Maintenant » propose une seule tâche due aujourd'hui : 25 minutes maximum, titre de 80 caractères maximum, priorité la plus haute, créneau libre après l'heure courante et hors événements `FIXED` et `PLANNED`.
 - En énergie basse, les tâches `TODO` non critiques dues aujourd'hui sont reportées à demain ; seules les tâches critiques restent proposées.
 - Les 14 blocs d'alternance sont seedés et le bloc courant est affiché. L'import/édition depuis les réglages reste à faire.
-- Les dépendances de tâches/projets et le planner de projets (F5) ne sont pas encore implémentés.
+- Les dépendances et le planner de projets (F5) sont implémentés ; l'édition/replanification avancée reste à faire.
+
+## Projets (F5, 12 nov. 2026, délégués)
+
+- Un projet a un objectif, une échéance, des étapes avec estimation et un buffer de 20 % minimum (20 % par défaut).
+- Les dépendances d'étapes sont validées comme un DAG : pas de cycle, pas d'auto-dépendance, pas d'index hors bornes.
+- La planification utilise 60 % du temps libre, place chaque étape après ses dépendances et hors événements `FIXED`/`PLANNED`, et crée un événement `PLANNED` par étape.
+- Si les créneaux sont insuffisants, le backend répond `409` avec une explication et n'écrit rien ; il invite à réduire le périmètre ou à allonger l'échéance.
+- La progression est calculée à partir des étapes terminées ; l'édition et la replanification avancée des projets restent à faire.
 
 ## Non décidé
 
-Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, les valeurs hypothétiques de capacité et d'horaires ne sont pas des paramètres validés.
+Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, la politique de données DeepSeek, l'hébergement, le nom définitif et la mémoire de l'agent restent à trancher.

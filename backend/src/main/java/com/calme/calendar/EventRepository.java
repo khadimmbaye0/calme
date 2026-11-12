@@ -1,6 +1,7 @@
 package com.calme.calendar;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             Long userId, Instant endExclusive, Instant startInclusive);
 
     Optional<Event> findByIdAndUserId(Long id, Long userId);
+
+    List<Event> findByTaskIdIn(Collection<Long> taskIds);
 }

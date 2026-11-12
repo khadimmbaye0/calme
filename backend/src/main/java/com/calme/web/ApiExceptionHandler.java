@@ -3,6 +3,8 @@ package com.calme.web;
 import com.calme.auth.InvalidCredentialsException;
 import com.calme.calendar.EventConflictException;
 import com.calme.calendar.EventNotFoundException;
+import com.calme.projects.ProjectNotFoundException;
+import com.calme.projects.ProjectPlanException;
 import com.calme.tasks.TaskNotFoundException;
 import com.calme.tasks.TaskStateException;
 
@@ -43,6 +45,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(TaskStateException.class)
     ProblemDetail handleTaskState(TaskStateException exception) {
         return problem(HttpStatus.CONFLICT, "Tâche déjà modifiée", exception.getMessage());
+    }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    ProblemDetail handleProjectNotFound(ProjectNotFoundException exception) {
+        return problem(HttpStatus.NOT_FOUND, "Projet introuvable", exception.getMessage());
+    }
+
+    @ExceptionHandler(ProjectPlanException.class)
+    ProblemDetail handleProjectPlan(ProjectPlanException exception) {
+        return problem(HttpStatus.CONFLICT, "Projet non planifiable", exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
