@@ -2,13 +2,14 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable ». Le backend, le frontend, PostgreSQL, Docker Compose et la migration Flyway initiale sont en place. L'authentification, le calendrier, le planner, l'agent et le digest ne sont pas encore implémentés.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel ». Le backend, le frontend, PostgreSQL, Docker Compose, la migration Flyway initiale et le CRUD calendrier manuel sont en place. L'authentification, le planner, l'agent, le digest et les projets ne sont pas encore implémentés.
 
 ## Ce qui fonctionne
 
 - Backend Spring Boot 3.5 / Java 21 avec un endpoint de santé `GET /api/health`.
-- Frontend React 19 / Vite / TypeScript avec un écran de socle sobre.
-- PostgreSQL 16 et migration Flyway `V1__initial_schema.sql`.
+- CRUD calendrier `GET/POST/PUT/DELETE /api/events` avec validation des conflits et réponses `application/problem+json`.
+- Vue jour React 19 / Vite / TypeScript : navigation par jour, barre « maintenant » actualisée chaque minute, création, modification et suppression d'événements.
+- PostgreSQL 16, migrations Flyway `V1__initial_schema.sql` et `V2__seed_local_user.sql`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
 
@@ -74,6 +75,20 @@ npm run dev
 
 Vite sert l'application sur <http://localhost:5173> et proxyfie `/api` vers `http://localhost:8080`.
 
+## API calendrier
+
+```bash
+# Événements d'une journée (bornes ISO-8601, excluantes)
+curl "http://localhost:8080/api/events?from=2026-11-12T00:00:00Z&to=2026-11-13T00:00:00Z"
+
+# Création
+curl -X POST http://localhost:8080/api/events \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Relire le plan","startAt":"2026-11-12T19:00:00Z","endAt":"2026-11-12T19:15:00Z","kind":"PLANNED"}'
+```
+
+Un chevauchement entre événements `FIXED` ou `PLANNED` renvoie `409` avec un Problem Detail et n'écrit rien. Les `AVAILABILITY` peuvent se chevaucher. Les instants sont stockés en UTC et affichés dans le fuseau du navigateur.
+
 ## Tests et vérifications
 
 ```bash
@@ -93,7 +108,9 @@ La CI GitHub exécute les tests backend et frontend sur chaque pull request.
 
 ```text
 backend/                 Spring Boot 3.5, Java 21, Flyway
-  src/main/resources/db/migration/V1__initial_schema.sql
+  src/main/java/com/calme/calendar/   API et règles du calendrier
+  src/main/java/com/calme/user/       utilisateur local provisoire
+  src/main/resources/db/migration/    V1 schéma initial, V2 seed local
 frontend/                React 19, Vite, TypeScript, Tailwind CSS
 compose.yaml             PostgreSQL + backend + frontend
 docs/                    spécification, plan, décisions, questions, acceptation
@@ -102,7 +119,7 @@ fixtures/                données de départ vérifiables
 
 ## Décisions encore ouvertes
 
-Les choix non confirmés restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) et ne sont pas encodés dans le code. En particulier, aucune authentification, aucun horaire par défaut, aucune heure de digest et aucun fournisseur email ne sont implémentés. La migration initiale laisse ces colonnes nulles et sans valeur par défaut.
+Les choix non confirmés restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) et ne sont pas encodés dans le code. En particulier, l'authentification (question 6) reste à trancher : **l'API calendrier n'est pas protégée et doit rester limitée à un usage local** tant que ce choix n'est pas fait. Les horaires par défaut, l'heure et le fournisseur du digest, la politique de données DeepSeek et la calibration de la capacité restent également ouverts.
 
 ## Travailler avec DeepSeek Harness
 
