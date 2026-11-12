@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { logout, type AuthUser } from '../api/auth'
 import { errorMessage, UnauthorizedError } from '../api/client'
 import {
@@ -61,6 +61,7 @@ export default function CalendarScreen({
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [loadError, setLoadError] = useState<string | null>(null)
   const [now, setNow] = useState(() => new Date())
+  const timelineRef = useRef<HTMLDivElement | null>(null)
 
   const [editing, setEditing] = useState<CalendarEvent | null>(null)
   const [title, setTitle] = useState('')
@@ -203,6 +204,19 @@ export default function CalendarScreen({
 
   const isToday = startOfDay(selectedDay).getTime() === startOfDay(now).getTime()
   const nowMinutes = minutesFromStartOfDay(now, selectedDay)
+
+  useEffect(() => {
+    const element = timelineRef.current
+    if (!element || view !== 'calendar') {
+      return
+    }
+    const today = startOfDay(new Date())
+    if (startOfDay(selectedDay).getTime() !== today.getTime()) {
+      return
+    }
+    const currentMinutes = minutesFromStartOfDay(new Date(), selectedDay)
+    element.scrollTop = Math.max(0, (currentMinutes / 60) * HOUR_HEIGHT - 120)
+  }, [view, selectedDay])
   const sortedEvents = [...events].sort(
     (left, right) => new Date(left.startAt).getTime() - new Date(right.startAt).getTime(),
   )
@@ -332,12 +346,12 @@ export default function CalendarScreen({
           </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)_20rem]">
-          <div className={view === 'now' ? 'block' : 'hidden lg:block'}>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)_20rem]">
+          <div className={`min-w-0 ${view === 'now' ? 'block' : 'hidden lg:block'}`}>
             <NowPanel onUnauthorized={onUnauthorized} />
           </div>
 
-          <div className={view === 'calendar' ? 'block' : 'hidden'}>
+          <div className={`min-w-0 ${view === 'calendar' ? 'block' : 'hidden'}`}>
           <section
             aria-label={`Calendrier du ${formatLongDay(selectedDay)}`}
             className="rounded-2xl border border-line bg-paper p-4 sm:p-6"
@@ -359,7 +373,7 @@ export default function CalendarScreen({
               <p className="mb-4 text-sm text-ink/55">Rien de prévu. La journée peut rester libre.</p>
             )}
 
-            <div className="relative h-[72rem] overflow-hidden rounded-2xl bg-wash/50">
+            <div ref={timelineRef} className="relative h-[65vh] min-h-[26rem] overflow-y-auto rounded-2xl bg-wash/50 lg:h-[72rem] lg:overflow-hidden">
               {HOURS.map((hour) => (
                 <div
                   key={hour}
@@ -421,11 +435,11 @@ export default function CalendarScreen({
           </section>
           </div>
 
-          <div className={view === 'calendar' ? 'block' : 'hidden'}>
+          <div className={`min-w-0 ${view === 'calendar' ? 'block' : 'hidden'}`}>
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <form
               onSubmit={handleSubmit}
-              className="rounded-2xl border border-line bg-paper p-5"
+              className="min-w-0 rounded-2xl border border-line bg-paper p-5"
             >
               <h2 className="font-serif text-xl">{editing ? 'Modifier ce moment' : 'Ajouter un moment'}</h2>
               <p className="mt-1 text-xs leading-relaxed text-ink/45">
@@ -444,7 +458,7 @@ export default function CalendarScreen({
                   />
                 </label>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="block">
                     <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink/55">Début</span>
                     <input
@@ -528,15 +542,15 @@ export default function CalendarScreen({
           </aside>
           </div>
 
-          <div className={view === 'agent' ? 'block lg:col-span-2' : 'hidden'}>
+          <div className={`min-w-0 ${view === 'agent' ? 'block lg:col-span-2' : 'hidden'}`}>
             {view === 'agent' && <AgentPanel onUnauthorized={onUnauthorized} />}
           </div>
 
-          <div className={view === 'projects' ? 'block lg:col-span-2' : 'hidden'}>
+          <div className={`min-w-0 ${view === 'projects' ? 'block lg:col-span-2' : 'hidden'}`}>
             {view === 'projects' && <ProjectsPanel onUnauthorized={onUnauthorized} />}
           </div>
 
-          <div className={view === 'journal' ? 'block lg:col-span-2' : 'hidden'}>
+          <div className={`min-w-0 ${view === 'journal' ? 'block lg:col-span-2' : 'hidden'}`}>
             {view === 'journal' && <JournalPanel onUnauthorized={onUnauthorized} />}
           </div>
         </div>
