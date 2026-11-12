@@ -1,0 +1,6 @@
+# Développement local : publie PostgreSQL sur la boucle locale pour que le
+# backend lancé depuis l'hôte puisse s'y connecter.
+services:
+  db:
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"

@@ -60,6 +60,14 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - Une suppression d'événement annulée restaure le même identifiant. L'annulation n'ajoute pas une nouvelle action au journal.
 - Le journal est prêt à recevoir les actions de l'agent LLM, sans lui donner d'écriture directe en base.
 
+## Déploiement local (12 nov. 2026, délégué)
+
+- `./scripts/up.sh` (ou `make up`) prépare `.env`, génère les secrets locaux, construit et démarre la pile, puis attend `/api/health`.
+- Seul le frontend est publié (`FRONTEND_PORT=5173` par défaut) ; PostgreSQL et Spring restent sur le réseau Compose. `compose.dev.yaml` publie PostgreSQL sur la boucle locale pour le développement.
+- `POSTGRES_PASSWORD`, `CALME_AUTH_PASSWORD` et `DEEPSEEK_API_KEY` restent dans `.env`, ignoré par Git et en mode `600`. Aucun secret n'est commité ni intégré à l'image.
+- La clé DeepSeek est transmise au backend via `DEEPSEEK_API_KEY`, avec `DEEPSEEK_MODEL=deepseek-flash` par défaut. Le mode LLM reste `simulated` tant que l'agent n'est pas branché et que la politique de données (question 8) n'est pas tranchée.
+- Healthchecks backend/frontend et `restart: unless-stopped`. Ce n'est pas encore un déploiement de production : pas de TLS, de sauvegarde ni de supervision.
+
 ## Non décidé
 
 Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, la politique de données DeepSeek, l'hébergement, le nom définitif et la mémoire de l'agent restent à trancher.
