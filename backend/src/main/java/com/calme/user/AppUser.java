@@ -2,6 +2,8 @@ package com.calme.user;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +24,9 @@ public class AppUser {
 
     @Column(nullable = false)
     private String timezone;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -45,6 +50,15 @@ public class AppUser {
 
     public String getTimezone() {
         return timezone;
+    }
+
+    @JsonIgnore
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public Instant getCreatedAt() {

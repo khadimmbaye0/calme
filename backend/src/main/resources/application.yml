@@ -22,5 +22,15 @@ management:
     health:
       show-details: never
 
+calme:
+  auth:
+    password: ${CALME_AUTH_PASSWORD:}
+
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: strict
+        secure: false

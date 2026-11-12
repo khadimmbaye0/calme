@@ -1,7 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
-import type { CalendarEvent, EventInput } from './api/events'
 
 function response(body: unknown, status = 200): Response {
   return {
@@ -11,156 +10,122 @@ function response(body: unknown, status = 200): Response {
   } as Response
 }
 
-function todayAt(hours: number, minutes = 0): Date {
-  const date = new Date()
-  date.setHours(hours, minutes, 0, 0)
-  return date
+type Handler = (url: string, init?: RequestInit) => Response
+
+function stubFetch(handler: Handler) {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => handler(String(input), init))
+  vi.stubGlobal('fetch', fetchMock)
+  return fetchMock
 }
 
-function eventAt(
-  id: number,
-  title: string,
-  startAt: Date,
-  endAt: Date,
-  kind: CalendarEvent['kind'] = 'FIXED',
-): CalendarEvent {
-  return {
-    id,
-    title,
-    startAt: startAt.toISOString(),
-    endAt: endAt.toISOString(),
-    kind,
-    createdBy: 'USER',
-  }
-}
+const LOCAL_EMAIL = 'local@calme.invalid'
 
-describe('App calendrier', () => {
+describe('App authentification', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
-  it('affiche les événements du jour et la barre maintenant', async () => {
-    const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
-    vi.stubGlobal('fetch', vi.fn(async () => response([event])))
-
-    render(<App />)
-
-    expect(screen.getByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
-    expect(await screen.findByText('Cours')).toBeInTheDocument()
-    expect(screen.getByText(/maintenant/i)).toBeInTheDocument()
-  })
-
-  it('ajoute un moment et recharge la journée', async () => {
-    let store: CalendarEvent[] = []
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      const method = init?.method ?? 'GET'
-      if (method === 'GET') {
-        return response(store)
+  it('affiche l’écran de connexion sans session', async () => {
+    stubFetch((url) => {
+      if (url.includes('/api/auth/me')) {
+        return response({}, 401)
       }
-      if (method === 'POST') {
-        const input = JSON.parse(String(init?.body)) as EventInput
-        const created: CalendarEvent = { id: 2, ...input, createdBy: 'USER' }
-        store = [created]
-        return response(created, 201)
-      }
-      return response({}, 500)
+      return response({}, 404)
     })
-    vi.stubGlobal('fetch', fetchMock)
 
     render(<App />)
-    await screen.findByText(/rien de prévu/i)
 
-    fireEvent.change(screen.getByLabelText('Titre'), { target: { value: 'Relire le plan' } })
-    fireEvent.change(screen.getByLabelText('Début'), { target: { value: '09:00' } })
-    fireEvent.change(screen.getByLabelText('Fin'), { target: { value: '09:30' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }))
-
-    expect(await screen.findByText('Relire le plan')).toBeInTheDocument()
-
-    const postCall = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
-    expect(postCall).toBeDefined()
-    const body = JSON.parse(String(postCall?.[1]?.body)) as EventInput
-    expect(body.title).toBe('Relire le plan')
-    expect(body.kind).toBe('FIXED')
-    expect(body.startAt).toMatch(/T09:00:00/)
+    expect(await screen.findByRole('heading', { name: /un mot de passe suffit/i })).toBeInTheDocument()
+    expect(screen.getByText(LOCAL_EMAIL)).toBeInTheDocument()
   })
 
-  it('modifie un moment sélectionné', async () => {
-    const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
-    let store: CalendarEvent[] = [event]
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      const method = init?.method ?? 'GET'
-      if (method === 'GET') {
-        return response(store)
+  it('se connecte et affiche le calendrier', async () => {
+    let loginBody: Record<string, unknown> | null = null
+    stubFetch((url, init) => {
+      if (url.includes('/api/auth/me')) {
+        return response({}, 401)
       }
-      if (method === 'PUT') {
-        const input = JSON.parse(String(init?.body)) as EventInput
-        store = store.map((item) => (item.id === event.id ? { ...item, ...input } : item))
-        return response(store[0])
+      if (url.includes('/api/auth/login')) {
+        loginBody = JSON.parse(String(init?.body)) as Record<string, unknown>
+        return response({ email: LOCAL_EMAIL })
       }
-      return response({}, 500)
-    })
-    vi.stubGlobal('fetch', fetchMock)
-
-    render(<App />)
-    fireEvent.click(await screen.findByRole('button', { name: /Cours/ }))
-    fireEvent.change(screen.getByLabelText('Titre'), { target: { value: 'Cours décalé' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
-
-    expect(await screen.findByText('Cours décalé')).toBeInTheDocument()
-    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(true)
-  })
-
-  it('affiche calmement un conflit signalé par le serveur', async () => {
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      if ((init?.method ?? 'GET') === 'GET') {
+      if (url.includes('/api/events')) {
         return response([])
       }
-      return response({ title: 'Créneau indisponible', detail: 'Ce créneau chevauche « Cours ».' }, 409)
+      return response({}, 404)
     })
-    vi.stubGlobal('fetch', fetchMock)
 
     render(<App />)
-    await screen.findByText(/rien de prévu/i)
+    await screen.findByRole('heading', { name: /un mot de passe suffit/i })
 
-    fireEvent.change(screen.getByLabelText('Titre'), { target: { value: 'Réunion' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }))
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'secret' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Entrer' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Ce créneau chevauche « Cours ».')
-    expect(screen.queryByText(/erreur/i)).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
+    expect(loginBody).toEqual({ password: 'secret' })
   })
 
-  it('affiche un message calme quand le serveur ne répond pas', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
-
-    render(<App />)
-
-    expect(await screen.findByText(/pas joignable pour le moment/i)).toBeInTheDocument()
-  })
-
-  it('permet de supprimer un moment sélectionné', async () => {
-    const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
-    let store: CalendarEvent[] = [event]
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      const method = init?.method ?? 'GET'
-      if (method === 'GET') {
-        return response(store)
+  it('ouvre directement le calendrier avec une session existante', async () => {
+    stubFetch((url) => {
+      if (url.includes('/api/auth/me')) {
+        return response({ email: LOCAL_EMAIL })
       }
-      if (method === 'DELETE') {
-        store = []
+      if (url.includes('/api/events')) {
+        return response([])
+      }
+      return response({}, 404)
+    })
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
+  })
+
+  it('affiche calmement un mauvais mot de passe', async () => {
+    stubFetch((url) => {
+      if (url.includes('/api/auth/me')) {
+        return response({}, 401)
+      }
+      if (url.includes('/api/auth/login')) {
+        return response(
+          { title: 'Identifiants invalides', detail: 'Le mot de passe ne correspond pas.' },
+          401,
+        )
+      }
+      return response({}, 404)
+    })
+
+    render(<App />)
+    await screen.findByRole('heading', { name: /un mot de passe suffit/i })
+
+    fireEvent.change(screen.getByLabelText('Mot de passe'), { target: { value: 'wrong' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Entrer' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Le mot de passe ne correspond pas.')
+  })
+
+  it('revient à la connexion après déconnexion', async () => {
+    let loggedOut = false
+    stubFetch((url, init) => {
+      if (url.includes('/api/auth/me')) {
+        return response({ email: LOCAL_EMAIL })
+      }
+      if (url.includes('/api/events')) {
+        return response([])
+      }
+      if (url.includes('/api/auth/logout') && init?.method === 'POST') {
+        loggedOut = true
         return response(undefined, 204)
       }
-      return response({}, 500)
+      return response({}, 404)
     })
-    vi.stubGlobal('fetch', fetchMock)
 
     render(<App />)
-    fireEvent.click(await screen.findByRole('button', { name: /Cours/ }))
-    fireEvent.click(screen.getByRole('button', { name: /supprimer ce moment/i }))
+    await screen.findByRole('heading', { name: /une journée à la fois/i })
 
-    await waitFor(() => {
-      expect(screen.queryByText('Cours')).not.toBeInTheDocument()
-    })
-    expect(screen.getByText(/rien de prévu/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /se déconnecter/i }))
+
+    expect(await screen.findByRole('heading', { name: /un mot de passe suffit/i })).toBeInTheDocument()
+    expect(loggedOut).toBe(true)
   })
 })

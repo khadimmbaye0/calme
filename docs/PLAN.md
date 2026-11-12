@@ -13,7 +13,7 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 
 - [x] Initialiser le squelette Spring Boot + React, TypeScript et Vite.
 - [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
-- [ ] Mettre en place l'authentification mono-utilisateur (F1).
+- [x] Mettre en place l'authentification mono-utilisateur (F1). *(session + BCrypt, sans 2FA)*
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
   - [x] Entités `AppUser` et `Event` et seed local provisoire.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
