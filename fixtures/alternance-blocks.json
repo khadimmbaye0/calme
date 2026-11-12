@@ -1,0 +1,16 @@
+[
+  { "number": 1, "start_date": "2026-11-02", "end_date": "2026-11-21", "type": "SCHOOL", "weeks": 3, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 2, "start_date": "2026-11-23", "end_date": "2026-12-06", "type": "COMPANY", "weeks": 2, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 3, "start_date": "2026-12-07", "end_date": "2026-12-12", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 4, "start_date": "2026-12-14", "end_date": "2027-01-03", "type": "COMPANY", "weeks": 3, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 5, "start_date": "2027-01-04", "end_date": "2027-01-09", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 6, "start_date": "2027-01-11", "end_date": "2027-01-24", "type": "COMPANY", "weeks": 2, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 7, "start_date": "2027-01-25", "end_date": "2027-01-30", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 8, "start_date": "2027-02-01", "end_date": "2027-02-14", "type": "COMPANY", "weeks": 2, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 9, "start_date": "2027-02-15", "end_date": "2027-02-20", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 10, "start_date": "2027-02-22", "end_date": "2027-03-07", "type": "COMPANY", "weeks": 2, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 11, "start_date": "2027-03-08", "end_date": "2027-03-13", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 12, "start_date": "2027-03-15", "end_date": "2027-04-11", "type": "COMPANY", "weeks": 4, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 13, "start_date": "2027-04-12", "end_date": "2027-04-17", "type": "SCHOOL", "weeks": 1, "default_availability": null, "reserved_time_ratio": null },
+  { "number": 14, "start_date": "2027-04-19", "end_date": "2027-06-30", "type": "COMPANY", "weeks": 10.4, "default_availability": null, "reserved_time_ratio": 0.2 }
+]

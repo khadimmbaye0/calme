@@ -1,0 +1,36 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Java / Spring
+target/
+build/
+.gradle/
+
+# JavaScript / TypeScript
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Local data and logs
+*.log
+*.sqlite
+*.sqlite3
+*.db
+data/
+backups/
+
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

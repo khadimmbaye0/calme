@@ -1,0 +1,26 @@
+name: Signaler un problème
+description: Décrire un défaut reproductible dans Calme
+body:
+  - type: textarea
+    id: expected
+    attributes:
+      label: Résultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Résultat obtenu
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      description: Ne pas inclure de mot de passe, clé API ou donnée réelle confidentielle.
+    validations:
+      required: true
+  - type: input
+    id: acceptance
+    attributes:
+      label: Critère d'acceptation concerné (si connu)

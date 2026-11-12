@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Calme agent proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "actions", "clarification"],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/create_event" },
+          { "$ref": "#/$defs/update_event" },
+          { "$ref": "#/$defs/delete_event" },
+          { "$ref": "#/$defs/create_task" },
+          { "$ref": "#/$defs/plan_project" },
+          { "$ref": "#/$defs/reschedule" },
+          { "$ref": "#/$defs/lighten_day" },
+          { "$ref": "#/$defs/set_energy" },
+          { "$ref": "#/$defs/set_availability" },
+          { "$ref": "#/$defs/query_today" },
+          { "$ref": "#/$defs/explain_decision" },
+          { "$ref": "#/$defs/set_block_schedule" }
+        ]
+      }
+    },
+    "clarification": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/clarification" }
+      ]
+    }
+  },
+  "$defs": {
+    "explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "create_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "title", "start_at", "end_at", "kind", "explanation"],
+      "properties": {
+        "intent": { "const": "create_event" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "start_at": { "type": "string", "format": "date-time" },
+        "end_at": { "type": "string", "format": "date-time" },
+        "kind": { "enum": ["FIXED", "PLANNED"] },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "update_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "event_ref", "changes", "explanation"],
+      "properties": {
+        "intent": { "const": "update_event" },
+        "event_ref": { "type": "string", "minLength": 1 },
+        "changes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+            "start_at": { "type": "string", "format": "date-time" },
+            "end_at": { "type": "string", "format": "date-time" }
+          }
+        },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "delete_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "event_ref", "explanation"],
+      "properties": {
+        "intent": { "const": "delete_event" },
+        "event_ref": { "type": "string", "minLength": 1 },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "create_task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "title", "estimate_min", "estimate_max", "priority", "explanation"],
+      "properties": {
+        "intent": { "const": "create_task" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "project_ref": { "type": ["string", "null"] },
+        "estimate_min": { "type": "integer", "minimum": 1 },
+        "estimate_max": { "type": "integer", "minimum": 1 },
+        "priority": { "enum": ["CRITICAL", "NORMAL", "OPTIONAL"] },
+        "due_date": { "type": ["string", "null"], "format": "date" },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "plan_project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "title", "goal", "deadline", "buffer_ratio", "steps", "explanation"],
+      "properties": {
+        "intent": { "const": "plan_project" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "goal": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "deadline": { "type": "string", "format": "date" },
+        "buffer_ratio": { "type": "number", "minimum": 0.2, "maximum": 0.8 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ref", "title", "estimate_min", "estimate_max", "depends_on"],
+            "properties": {
+              "ref": { "type": "string", "minLength": 1 },
+              "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+              "estimate_min": { "type": "integer", "minimum": 1 },
+              "estimate_max": { "type": "integer", "minimum": 1 },
+              "depends_on": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "reschedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "moves", "explanation"],
+      "properties": {
+        "intent": { "const": "reschedule" },
+        "moves": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event_ref", "start_at", "end_at"],
+            "properties": {
+              "event_ref": { "type": "string", "minLength": 1 },
+              "start_at": { "type": "string", "format": "date-time" },
+              "end_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "lighten_day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "date", "explanation"],
+      "properties": {
+        "intent": { "const": "lighten_day" },
+        "date": { "type": "string", "format": "date" },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "set_energy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "date", "level", "explanation"],
+      "properties": {
+        "intent": { "const": "set_energy" },
+        "date": { "type": "string", "format": "date" },
+        "level": { "enum": ["LOW", "MID", "GOOD"] },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "set_availability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "start_at", "end_at", "explanation"],
+      "properties": {
+        "intent": { "const": "set_availability" },
+        "start_at": { "type": "string", "format": "date-time" },
+        "end_at": { "type": "string", "format": "date-time" },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "query_today": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "date", "explanation"],
+      "properties": {
+        "intent": { "const": "query_today" },
+        "date": { "type": "string", "format": "date" },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "explain_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "action_ref", "explanation"],
+      "properties": {
+        "intent": { "const": "explain_decision" },
+        "action_ref": { "type": "string", "minLength": 1 },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "set_block_schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "type", "start_date", "end_date", "explanation"],
+      "properties": {
+        "intent": { "const": "set_block_schedule" },
+        "type": { "enum": ["SCHOOL", "COMPANY"] },
+        "start_date": { "type": "string", "format": "date" },
+        "end_date": { "type": "string", "format": "date" },
+        "explanation": { "$ref": "#/$defs/explanation" }
+      }
+    },
+    "clarification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "options"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+[
+  { "id": "event-01", "group": "create_event_and_availability", "text": "Demain j'ai cours, je rentre vers 18h, je suis disponible après.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-02", "group": "create_event_and_availability", "text": "J'ai cours demain et je serai libre à partir de 18 h.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-03", "group": "create_event_and_availability", "text": "Note mes cours de demain ; je peux prévoir quelque chose après 18h.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-04", "group": "create_event_and_availability", "text": "Demain, cours toute la journée, puis disponible dès 18 heures.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-05", "group": "create_event_and_availability", "text": "Ajoute mes cours demain et garde le créneau du soir libre à partir de 18h.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-06", "group": "create_event_and_availability", "text": "Demain je suis en cours, retour prévu vers 18h : je serai libre ensuite.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "event-07", "group": "create_event_and_availability", "text": "Mets mes cours demain dans le calendrier ; je suis disponible après 18 h.", "expected_intents": ["create_event", "set_availability"] },
+  { "id": "project-01", "group": "plan_project", "text": "Je veux finir mon projet CS231N en 3 semaines.", "expected_intents": ["plan_project"] },
+  { "id": "project-02", "group": "plan_project", "text": "Planifie ce qu'il faut pour terminer CS231N d'ici trois semaines.", "expected_intents": ["plan_project"] },
+  { "id": "project-03", "group": "plan_project", "text": "Aide-moi à finir mon projet CS231N dans les trois prochaines semaines.", "expected_intents": ["plan_project"] },
+  { "id": "project-04", "group": "plan_project", "text": "Je dois terminer CS231N dans trois semaines ; découpe le travail et organise-le.", "expected_intents": ["plan_project"] },
+  { "id": "project-05", "group": "plan_project", "text": "Fais un plan réaliste pour boucler mon projet CS231N en 3 semaines.", "expected_intents": ["plan_project"] },
+  { "id": "project-06", "group": "plan_project", "text": "Organise les étapes de mon projet CS231N pour qu'il soit fini dans trois semaines.", "expected_intents": ["plan_project"] },
+  { "id": "project-07", "group": "plan_project", "text": "J'aimerais avoir terminé CS231N dans trois semaines, propose un planning avec de la marge.", "expected_intents": ["plan_project"] },
+  { "id": "energy-01", "group": "lighten_day", "text": "Je suis fatigué aujourd'hui, allège ma journée.", "expected_intents": ["set_energy", "lighten_day"] },
+  { "id": "energy-02", "group": "lighten_day", "text": "Je n'ai presque plus d'énergie aujourd'hui ; garde seulement l'essentiel.", "expected_intents": ["set_energy", "lighten_day"] },
+  { "id": "energy-03", "group": "lighten_day", "text": "Je suis épuisé, peux-tu alléger ce qu'il me reste à faire aujourd'hui ?", "expected_intents": ["set_energy", "lighten_day"] },
+  { "id": "energy-04", "group": "lighten_day", "text": "Aujourd'hui je suis à plat. Réduis ma charge sans toucher aux cours ni aux réunions.", "expected_intents": ["set_energy", "lighten_day"] },
+  { "id": "energy-05", "group": "lighten_day", "text": "Baisse mon niveau d'énergie à bas et reporte les tâches non essentielles du jour.", "expected_intents": ["set_energy", "lighten_day"] },
+  { "id": "energy-06", "group": "lighten_day", "text": "Je suis trop fatigué pour tout faire aujourd'hui : ne laisse que le prioritaire.", "expected_intents": ["set_energy", "lighten_day"] }
+]

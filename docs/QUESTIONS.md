@@ -1,0 +1,23 @@
+# Questions ouvertes
+
+Ne pas inventer de réponse à ces questions. Ajouter une décision à `DECISIONS.md` une fois que l'utilisateur l'a confirmée.
+
+1. Heure exacte et contenu du digest (07h30 est une proposition).
+2. Mode focus : V1 (proposition), pas MVP.
+3. Apprentissage de l'énergie : V1 (proposition), pas MVP.
+4. Hébergement final : serveur personnel ou Oracle Cloud Free Tier.
+5. Fuseau horaire et disponibilités par défaut pour les blocs école/entreprise.
+6. Authentification : session ou JWT ; besoin éventuel de 2FA.
+7. Fournisseur email : SMTP personnel ou service dédié.
+8. Politique de données DeepSeek : titres de projets/tâches autorisés ou anonymisation.
+9. Mémoire agent au-delà des projets, préférences, énergie et blocs d'alternance.
+10. Nom définitif du produit (« Calme » est provisoire).
+11. Capacité planifiable de 60 % : hypothèse à calibrer après deux semaines d'usage.
+
+## Dépendances d'implémentation
+
+- La question 5 bloque la définition des disponibilités par défaut des fixtures d'alternance.
+- Les questions 1 et 7 bloquent l'envoi réel du digest ; le développement du contenu et des tests simulés peut avancer.
+- La question 8 doit être tranchée avant l'envoi de données réelles au LLM.
+- La question 6 doit être tranchée avant de figer les frontières et tests d'authentification.
+- Les autres choix ne doivent pas bloquer les fondations indépendantes.
