@@ -6,13 +6,13 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 
 - [x] Rechercher les conventions officielles DeepSeek Harness.
 - [x] Mettre en place les instructions, documents de référence, compétences et fixtures.
-- [ ] Créer le dépôt GitHub privé et publier le commit initial sur `main`.
+- [x] Créer le dépôt GitHub privé et publier le commit initial sur `main`.
 - [ ] Vérifier la protection de `main` et la CI de validation des fixtures.
 
 ## Semaine 1 — Fondations
 
-- [ ] Initialiser le squelette Spring Boot + React, TypeScript et Vite.
-- [ ] Ajouter Docker Compose avec PostgreSQL et Flyway.
+- [x] Initialiser le squelette Spring Boot + React, TypeScript et Vite.
+- [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
 - [ ] Mettre en place l'authentification mono-utilisateur (F1).
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
