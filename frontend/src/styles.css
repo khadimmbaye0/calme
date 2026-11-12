@@ -2,25 +2,61 @@
 
 @theme {
   --color-cream: #faf6ee;
+  --color-paper: #fffdf8;
+  --color-wash: #f3ecdf;
+  --color-line: #e7dfd2;
   --color-ink: #2b2620;
   --color-terracotta: #c4704b;
   --color-sage: #8aa07c;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
 }
 
 @layer base {
   html {
     background-color: var(--color-cream);
+    scroll-behavior: auto;
   }
 
   body {
     margin: 0;
     min-height: 100vh;
     @apply bg-cream font-sans text-ink antialiased;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-terracotta) 60%, transparent);
+    outline-offset: 3px;
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-terracotta) 25%, transparent);
+    background-color: color-mix(in srgb, var(--color-terracotta) 22%, transparent);
+  }
+
+  /*
+   * L'interface est volontairement statique : les changements d'état sont
+   * immédiats, sans transition décorative ni animation d'entrée.
+   */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

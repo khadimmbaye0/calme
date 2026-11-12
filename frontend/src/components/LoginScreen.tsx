@@ -41,7 +41,7 @@ export default function LoginScreen({ onAuthenticated }: LoginScreenProps) {
 
         <form
           onSubmit={handleSubmit}
-          className="mt-8 rounded-3xl border border-ink/10 bg-white/55 p-6 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)]"
+          className="mt-8 rounded-2xl border border-line bg-paper p-6 "
         >
           <label className="block">
             <span className="text-xs font-medium uppercase tracking-[0.14em] text-ink/55">Mot de passe</span>
@@ -51,7 +51,7 @@ export default function LoginScreen({ onAuthenticated }: LoginScreenProps) {
               onChange={(event) => setPassword(event.target.value)}
               autoFocus
               autoComplete="current-password"
-              className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+              className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
             />
           </label>
 
@@ -64,7 +64,7 @@ export default function LoginScreen({ onAuthenticated }: LoginScreenProps) {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-5 w-full rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-cream transition hover:bg-terracotta/90 disabled:opacity-50"
+            className="mt-5 w-full rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-50"
           >
             {submitting ? 'Ouverture…' : 'Entrer'}
           </button>
