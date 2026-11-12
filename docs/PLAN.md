@@ -15,7 +15,8 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 - [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
 - [x] Mettre en place l'authentification mono-utilisateur (F1). *(session + BCrypt, sans 2FA)*
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
-  - [x] Entités `AppUser` et `Event` et seed local provisoire.
+  - [x] Entités `AppUser`, `Event`, `Task`, `EnergyLog` et `Block`.
+  - [ ] Entités `Project`, `TaskDependency` et `Settings`.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
   - [x] CRUD manuel (API + UI), conflits signalés et barre « maintenant ».
   - [ ] CRUD via l'agent.
@@ -24,9 +25,13 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 ## Semaine 2 — Planner
 
 - [ ] Implémenter et tester les règles pures de capacité, énergie, dépendances et conflits.
+  - [x] Capacité, énergie, conflits et sélection de l'action « Maintenant ».
+  - [ ] Dépendances de tâches et planner de projets (F5).
 - [ ] Importer et éditer les blocs d'alternance (F7).
-- [ ] Construire l'écran « Maintenant » et ses trois actions (F3).
-- **Jalon :** une action cohérente est proposée depuis des données saisies manuellement.
+  - [x] Seed des 14 blocs et affichage du bloc courant.
+  - [ ] Import/édition depuis les réglages.
+- [x] Construire l'écran « Maintenant » et ses trois actions (F3).
+- **Jalon :** une action cohérente est proposée depuis des données saisies manuellement. *(atteint avec les tâches et l'énergie saisies à la main)*
 
 ## Semaine 3 — Agent
 

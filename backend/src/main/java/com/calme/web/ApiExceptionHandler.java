@@ -3,6 +3,8 @@ package com.calme.web;
 import com.calme.auth.InvalidCredentialsException;
 import com.calme.calendar.EventConflictException;
 import com.calme.calendar.EventNotFoundException;
+import com.calme.tasks.TaskNotFoundException;
+import com.calme.tasks.TaskStateException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -31,6 +33,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler({AuthenticationException.class, InvalidCredentialsException.class})
     ProblemDetail handleAuthentication(RuntimeException exception) {
         return problem(HttpStatus.UNAUTHORIZED, "Identifiants invalides", "Le mot de passe ne correspond pas.");
+    }
+
+    @ExceptionHandler(TaskNotFoundException.class)
+    ProblemDetail handleTaskNotFound(TaskNotFoundException exception) {
+        return problem(HttpStatus.NOT_FOUND, "Tâche introuvable", exception.getMessage());
+    }
+
+    @ExceptionHandler(TaskStateException.class)
+    ProblemDetail handleTaskState(TaskStateException exception) {
+        return problem(HttpStatus.CONFLICT, "Tâche déjà modifiée", exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

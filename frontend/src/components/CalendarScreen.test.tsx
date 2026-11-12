@@ -34,12 +34,21 @@ function eventAt(
   }
 }
 
+const REST_NOW = {
+  task: null,
+  energy: 'GOOD' as const,
+  blockType: null,
+  capacityMinutes: 0,
+  message: 'Rien à faire maintenant. Repose-toi.',
+}
+
 function renderCalendar(onLoggedOut = vi.fn(), onUnauthorized = vi.fn()) {
   return render(
     <CalendarScreen
       user={{ email: 'local@calme.invalid' }}
       onLoggedOut={onLoggedOut}
       onUnauthorized={onUnauthorized}
+      initialView="calendar"
     />,
   )
 }
@@ -51,18 +60,29 @@ describe('CalendarScreen', () => {
 
   it('affiche les événements du jour et la barre maintenant', async () => {
     const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
-    vi.stubGlobal('fetch', vi.fn(async () => response([event])))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input).includes('/api/now')) {
+          return response(REST_NOW)
+        }
+        return response([event])
+      }),
+    )
 
     renderCalendar()
 
     expect(screen.getByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
     expect(await screen.findByText('Cours')).toBeInTheDocument()
-    expect(screen.getByText(/maintenant/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/maintenant/i).length).toBeGreaterThan(0)
   })
 
   it('ajoute un moment et recharge la journée', async () => {
     let store: CalendarEvent[] = []
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(_input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
       const method = init?.method ?? 'GET'
       if (method === 'GET') {
         return response(store)
@@ -99,6 +119,9 @@ describe('CalendarScreen', () => {
     const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
     let store: CalendarEvent[] = [event]
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(_input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
       const method = init?.method ?? 'GET'
       if (method === 'GET') {
         return response(store)
@@ -123,6 +146,9 @@ describe('CalendarScreen', () => {
 
   it('affiche calmement un conflit signalé par le serveur', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(_input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
       if ((init?.method ?? 'GET') === 'GET') {
         return response([])
       }
@@ -145,13 +171,16 @@ describe('CalendarScreen', () => {
 
     renderCalendar()
 
-    expect(await screen.findByText(/pas joignable pour le moment/i)).toBeInTheDocument()
+    expect((await screen.findAllByText(/pas joignable pour le moment/i)).length).toBeGreaterThan(0)
   })
 
   it('permet de supprimer un moment sélectionné', async () => {
     const event = eventAt(1, 'Cours', todayAt(9), todayAt(10))
     let store: CalendarEvent[] = [event]
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(_input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
       const method = init?.method ?? 'GET'
       if (method === 'GET') {
         return response(store)
@@ -177,6 +206,9 @@ describe('CalendarScreen', () => {
   it('se déconnecte et prévient le parent', async () => {
     const onLoggedOut = vi.fn()
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(_input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
       if ((init?.method ?? 'GET') === 'POST') {
         return response(undefined, 204)
       }

@@ -19,6 +19,13 @@ function stubFetch(handler: Handler) {
 }
 
 const LOCAL_EMAIL = 'local@calme.invalid'
+const REST_NOW = {
+  task: null,
+  energy: 'GOOD',
+  blockType: null,
+  capacityMinutes: 0,
+  message: 'Rien à faire maintenant. Repose-toi.',
+}
 
 describe('App authentification', () => {
   afterEach(() => {
@@ -49,6 +56,9 @@ describe('App authentification', () => {
         loginBody = JSON.parse(String(init?.body)) as Record<string, unknown>
         return response({ email: LOCAL_EMAIL })
       }
+      if (url.includes('/api/now')) {
+        return response(REST_NOW)
+      }
       if (url.includes('/api/events')) {
         return response([])
       }
@@ -69,6 +79,9 @@ describe('App authentification', () => {
     stubFetch((url) => {
       if (url.includes('/api/auth/me')) {
         return response({ email: LOCAL_EMAIL })
+      }
+      if (url.includes('/api/now')) {
+        return response(REST_NOW)
       }
       if (url.includes('/api/events')) {
         return response([])
@@ -109,6 +122,9 @@ describe('App authentification', () => {
     stubFetch((url, init) => {
       if (url.includes('/api/auth/me')) {
         return response({ email: LOCAL_EMAIL })
+      }
+      if (url.includes('/api/now')) {
+        return response(REST_NOW)
       }
       if (url.includes('/api/events')) {
         return response([])

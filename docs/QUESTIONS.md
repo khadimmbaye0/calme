@@ -6,7 +6,7 @@ Ne pas inventer de réponse à ces questions. Ajouter une décision à `DECISION
 2. Mode focus : V1 (proposition), pas MVP.
 3. Apprentissage de l'énergie : V1 (proposition), pas MVP.
 4. Hébergement final : serveur personnel ou Oracle Cloud Free Tier.
-5. Fuseau horaire et disponibilités par défaut pour les blocs école/entreprise.
+5. ~~Fuseau horaire et disponibilités par défaut pour les blocs école/entreprise.~~ **Décidé pour le MVP local : semaine école 17:30–22:00, entreprise 18:30–22:00, week-end 09:00–22:00 ; édition paramétrable à venir (voir DECISIONS.md).**
 6. ~~Authentification : session ou JWT ; besoin éventuel de 2FA.~~ **Décidé : session locale + BCrypt, sans 2FA (voir DECISIONS.md).**
 7. Fournisseur email : SMTP personnel ou service dédié.
 8. Politique de données DeepSeek : titres de projets/tâches autorisés ou anonymisation.
@@ -16,7 +16,7 @@ Ne pas inventer de réponse à ces questions. Ajouter une décision à `DECISION
 
 ## Dépendances d'implémentation
 
-- La question 5 bloque la définition des disponibilités par défaut des fixtures d'alternance.
+- La question 5 est tranchée pour le MVP : valeurs codées, édition paramétrable encore à faire.
 - Les questions 1 et 7 bloquent l'envoi réel du digest ; le développement du contenu et des tests simulés peut avancer.
 - La question 8 doit être tranchée avant l'envoi de données réelles au LLM.
 - La question 6 est tranchée : session locale, BCrypt, sans 2FA.

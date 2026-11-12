@@ -35,6 +35,15 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - Les événements `FIXED` et `PLANNED` ne peuvent pas se chevaucher : le backend répond `409` avec un Problem Detail, sans écriture. Les `AVAILABILITY` peuvent se chevaucher.
 - Le CRUD manuel est en place ; la partie agent de F2, le journal/undo et les récurrences restent à faire.
 
+## Planner et écran Maintenant (12 nov. 2026, délégués)
+
+- Capacité planifiable : 60 % en énergie bonne, 40 % en énergie moyenne, 30 % en énergie basse.
+- Disponibilités par défaut du MVP : en semaine, école 17:30–22:00 et entreprise 18:30–22:00 ; le week-end 09:00–22:00. La journée planifiée s'arrête avant les heures de repos (22:30). Ces valeurs sont codées, réversibles et seront éditables dans les réglages.
+- L'écran « Maintenant » propose une seule tâche due aujourd'hui : 25 minutes maximum, titre de 80 caractères maximum, priorité la plus haute, créneau libre après l'heure courante et hors événements `FIXED`.
+- En énergie basse, les tâches `TODO` non critiques dues aujourd'hui sont reportées à demain ; seules les tâches critiques restent proposées.
+- Les 14 blocs d'alternance sont seedés et le bloc courant est affiché. L'import/édition depuis les réglages reste à faire.
+- Les dépendances de tâches/projets et le planner de projets (F5) ne sont pas encore implémentés.
+
 ## Non décidé
 
 Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, les valeurs hypothétiques de capacité et d'horaires ne sont pas des paramètres validés.
