@@ -25,12 +25,15 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final LocalUserService localUser;
 
     public AuthController(
             AuthenticationManager authenticationManager,
-            SecurityContextRepository securityContextRepository) {
+            SecurityContextRepository securityContextRepository,
+            LocalUserService localUser) {
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
+        this.localUser = localUser;
     }
 
     @PostMapping("/login")
@@ -38,6 +41,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
+        localUser.ensureInitialized();
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(

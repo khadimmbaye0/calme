@@ -2,7 +2,7 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier manuel et la session mono-utilisateur sont en place. Le planner, l'agent, le digest et les projets ne sont pas encore implémentés.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur et un planner de base sont en place. Le planner complet (projets, dépendances), l'agent, le digest et les projets ne sont pas encore implémentés.
 
 ## Ce qui fonctionne
 
@@ -10,7 +10,10 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Authentification locale par session, mot de passe BCrypt, un seul compte.
 - CRUD calendrier `GET/POST/PUT/DELETE /api/events` protégé par la session, avec validation des conflits et réponses `application/problem+json`.
 - Vue jour React 19 / Vite / TypeScript : navigation par jour, barre « maintenant » actualisée chaque minute, création, modification et suppression d'événements.
-- PostgreSQL 16, migrations Flyway `V1__initial_schema.sql`, `V2__seed_local_user.sql` et `V3__add_password_hash.sql`.
+- Écran « Maintenant » : une seule action, énergie déclarée en un tap, boutons « Je commence », « Plus tard » et « Trop lourd ce soir ».
+- Planner de base : capacité 60/40/30 % selon l'énergie, tâches de 25 min maximum, titres de 80 caractères maximum, créneaux libres hors événements fixes, report des tâches non critiques en énergie basse.
+- Ajout manuel de tâches et seed des 14 blocs d'alternance ; le bloc courant est affiché.
+- PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
 
@@ -115,6 +118,28 @@ curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/auth/logout
 
 Un chevauchement entre événements `FIXED` ou `PLANNED` renvoie `409` avec un Problem Detail et n'écrit rien. Les `AVAILABILITY` peuvent se chevaucher. Les instants sont stockés en UTC et affichés dans le fuseau du navigateur.
 
+### Maintenant, tâches et énergie
+
+```bash
+# Action proposée par le planner
+curl -b /tmp/calme-cookies.txt http://localhost:8080/api/now
+
+# Ajouter une tâche manuellement (durée 10 à 25 min)
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Relire le plan","estimateMin":15,"estimateMax":15,"priority":"NORMAL","dueDate":"2026-11-12"}'
+
+# Déclarer l'énergie (LOW, MID ou GOOD)
+curl -b /tmp/calme-cookies.txt -X PUT http://localhost:8080/api/energy/today \
+  -H 'Content-Type: application/json' -d '{"level":"LOW"}'
+
+# Actions de l'écran Maintenant
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/now/start \
+  -H 'Content-Type: application/json' -d '{"taskId":1}'
+```
+
+Le planner ne place jamais une tâche sur un événement fixe. En énergie `LOW`, les tâches non critiques dues aujourd'hui sont reportées à demain et seules les tâches critiques restent proposées. Les dépendances de projets ne sont pas encore implémentées.
+
 ## Tests et vérifications
 
 ```bash
@@ -128,7 +153,7 @@ cd frontend && npm ci && npm test && npm run build
 python3 scripts/validate_fixtures.py
 ```
 
-La CI GitHub exécute les tests backend et frontend sur chaque pull request.
+La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 30 tests backend et 18 tests frontend.
 
 ## Structure
 
@@ -136,8 +161,12 @@ La CI GitHub exécute les tests backend et frontend sur chaque pull request.
 backend/                 Spring Boot 3.5, Java 21, Flyway
   src/main/java/com/calme/auth/       session, login/logout, compte local
   src/main/java/com/calme/calendar/   API et règles du calendrier
+  src/main/java/com/calme/tasks/      tâches manuelles
+  src/main/java/com/calme/planner/    règles pures et écran Maintenant
+  src/main/java/com/calme/energy/     énergie déclarée
+  src/main/java/com/calme/blocks/     blocs d'alternance et bloc courant
   src/main/java/com/calme/user/       utilisateur local
-  src/main/resources/db/migration/    V1 schéma, V2 seed local, V3 mot de passe
+  src/main/resources/db/migration/    V1 à V4
 frontend/                React 19, Vite, TypeScript, Tailwind CSS
 compose.yaml             PostgreSQL + backend + frontend
 docs/                    spécification, plan, décisions, questions, acceptation
@@ -146,7 +175,7 @@ fixtures/                données de départ vérifiables
 
 ## Décisions encore ouvertes
 
-L'authentification est tranchée (session + BCrypt, sans 2FA) et documentée dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix non confirmés restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : disponibilités et horaires par défaut, heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité, hébergement, nom définitif et mémoire de l'agent.
+L'authentification et les disponibilités par défaut du MVP sont tranchées et documentées dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
 
 ## Travailler avec DeepSeek Harness
 

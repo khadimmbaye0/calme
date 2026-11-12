@@ -10,6 +10,7 @@ import {
   type EventInput,
   type EventKind,
 } from '../api/events'
+import NowPanel from './NowPanel'
 import {
   addDays,
   combineDayAndTime,
@@ -41,9 +42,16 @@ interface CalendarScreenProps {
   user: AuthUser
   onLoggedOut: () => void
   onUnauthorized: () => void
+  initialView?: 'now' | 'calendar'
 }
 
-export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: CalendarScreenProps) {
+export default function CalendarScreen({
+  user,
+  onLoggedOut,
+  onUnauthorized,
+  initialView = 'now',
+}: CalendarScreenProps) {
+  const [view, setView] = useState<'now' | 'calendar'>(initialView)
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()))
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
@@ -197,7 +205,7 @@ export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: Ca
 
   return (
     <main className="min-h-screen bg-cream px-4 py-8 text-ink sm:px-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <header className="mb-8 space-y-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -221,7 +229,40 @@ export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: Ca
             </div>
           </div>
 
-          <div className="flex items-center gap-2" role="group" aria-label="Navigation dans le calendrier">
+          <div className="flex gap-2 lg:hidden" role="tablist" aria-label="Vue">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'now'}
+              onClick={() => setView('now')}
+              className={`rounded-full px-4 py-1.5 text-sm transition ${
+                view === 'now'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Maintenant
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'calendar'}
+              onClick={() => setView('calendar')}
+              className={`rounded-full px-4 py-1.5 text-sm transition ${
+                view === 'calendar'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Calendrier
+            </button>
+          </div>
+
+          <div
+            className={`flex items-center gap-2 ${view === 'calendar' ? '' : 'hidden lg:flex'}`}
+            role="group"
+            aria-label="Navigation dans le calendrier"
+          >
             <button
               type="button"
               onClick={() => changeDay(addDays(selectedDay, -1))}
@@ -248,7 +289,12 @@ export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: Ca
           </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)_20rem]">
+          <div className={view === 'now' ? 'block' : 'hidden lg:block'}>
+            <NowPanel onUnauthorized={onUnauthorized} />
+          </div>
+
+          <div className={view === 'calendar' ? 'block' : 'hidden lg:block'}>
           <section
             aria-label={`Calendrier du ${formatLongDay(selectedDay)}`}
             className="rounded-3xl border border-ink/10 bg-white/40 p-4 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] sm:p-6"
@@ -330,7 +376,9 @@ export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: Ca
               )}
             </div>
           </section>
+          </div>
 
+          <div className={view === 'calendar' ? 'block' : 'hidden lg:block'}>
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <form
               onSubmit={handleSubmit}
@@ -435,6 +483,7 @@ export default function CalendarScreen({ user, onLoggedOut, onUnauthorized }: Ca
               fixe ou planifié est refusé avec une explication.
             </p>
           </aside>
+          </div>
         </div>
       </div>
     </main>
