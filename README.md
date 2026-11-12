@@ -17,6 +17,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
 - Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
 - Interface minimaliste : papier chaud, titres Fraunces, cartes filaires, aucune animation décorative ; les changements d'état sont instantanés.
+- Déploiement en une commande : `./scripts/up.sh` ou `make up`, avec healthchecks, génération des secrets locaux et port frontend unique.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
@@ -26,6 +27,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Java 21 et Maven 3.9+
 - Node.js 22.12+ et npm
 - Docker et Docker Compose
+- Python 3 (script de démarrage et validation des fixtures)
 
 ## Aperçu
 
@@ -33,30 +35,52 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 
 <img src="docs/screenshots/accueil-desktop.png" alt="Écran principal Calme" width="720">
 
-## Démarrage rapide avec Docker Compose
+## Démarrage en une commande
 
-1. Copier la configuration locale :
+```bash
+./scripts/up.sh
+```
 
-   ```bash
-   cp .env.example .env
-   ```
+ou :
 
-2. Remplacer `POSTGRES_PASSWORD=replace-locally` par une valeur locale dans `.env`, puis y ajouter la variable `CALME_AUTH_PASSWORD` avec un mot de passe local. Ne jamais committer ce fichier.
+```bash
+make up
+```
 
-3. Lancer la pile :
+Le script crée `.env` si nécessaire, génère `POSTGRES_PASSWORD` et `CALME_AUTH_PASSWORD`, construit la pile, attend que l'application réponde et affiche l'URL ainsi que le mot de passe Calme à la première génération.
 
-   ```bash
-   docker compose up --build
-   ```
+Ouvrir <http://localhost:5173>. L'API et le healthcheck passent par le proxy Nginx (`http://localhost:5173/api/health`). Seul le port frontend est publié ; PostgreSQL et Spring restent internes.
 
-4. Ouvrir <http://localhost:5173>. Le backend répond sur <http://localhost:8080/api/health>.
+Arrêter la pile :
 
-Les ports par défaut sont `5432`, `8080` et `5173`. En cas de conflit, les surcharger avec `DB_PORT`, `BACKEND_PORT` et `FRONTEND_PORT` dans `.env`.
+```bash
+docker compose down
+```
 
-Pour arrêter et supprimer les données locales :
+Supprimer aussi les données locales :
 
 ```bash
 docker compose down -v
+```
+
+### Configuration manuelle
+
+Pour gérer `.env` soi-même :
+
+```bash
+cp .env.example .env
+# renseigner POSTGRES_PASSWORD et CALME_AUTH_PASSWORD
+docker compose up --build -d
+```
+
+Prérequis : Docker avec Docker Compose v2 et Python 3 pour le script. Le port `FRONTEND_PORT` vaut `5173` par défaut et peut être changé dans `.env`.
+
+### Développement avec PostgreSQL exposé
+
+Pour lancer le backend depuis l'hôte, publier PostgreSQL uniquement sur la boucle locale :
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml up -d db
 ```
 
 ## Connexion locale
@@ -72,7 +96,7 @@ docker compose down -v
 ### Base de données
 
 ```bash
-docker compose up -d db
+docker compose -f compose.yaml -f compose.dev.yaml up -d db
 ```
 
 ### Backend
@@ -97,7 +121,15 @@ npm run dev
 
 Vite sert l'application sur <http://localhost:5173> et proxyfie `/api` vers `http://localhost:8080`.
 
+## DeepSeek
+
+La clé DeepSeek est lue depuis `DEEPSEEK_API_KEY` dans `.env` (fichier non versionné) et transmise au backend. Le mode par défaut est `simulated` et le modèle par défaut `deepseek-flash`, modifiable avec `DEEPSEEK_MODEL`.
+
+L'agent LLM n'est pas encore branché : la clé et la configuration sont prêtes pour l'étape suivante, mais aucun appel réel avec des données utilisateur n'est effectué. La politique de données DeepSeek reste la question 8 de [`docs/QUESTIONS.md`](docs/QUESTIONS.md).
+
 ## API calendrier et authentification
+
+> Les exemples ci-dessous ciblent le backend local sur `:8080`. Avec la pile Docker, remplacer par `http://localhost:5173` : l'API passe par le proxy Nginx.
 
 ```bash
 # Charger les valeurs locales (dont CALME_AUTH_PASSWORD)

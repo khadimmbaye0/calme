@@ -48,8 +48,10 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
   - [x] Création d'un projet avec étapes, dépendances, buffer ≥ 20 % et planification.
   - [x] Suivi de progression et marquage terminé.
   - [ ] Replanification et édition avancée.
-- [ ] Appliquer le design system et vérifier desktop/mobile.
+- [x] Appliquer le design system et vérifier desktop/mobile.
 - [ ] Préparer déploiement, configuration de sauvegardes et procédure de restauration.
+  - [x] Pile Compose complète, healthchecks et script `./scripts/up.sh`.
+  - [ ] Sauvegardes et procédure de restauration.
 - **Jalon :** usage réel quotidien pendant une semaine.
 
 ## Règles de livraison
