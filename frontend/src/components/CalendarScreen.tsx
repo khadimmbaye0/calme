@@ -11,6 +11,7 @@ import {
   type EventKind,
 } from '../api/events'
 import NowPanel from './NowPanel'
+import ProjectsPanel from './ProjectsPanel'
 import {
   addDays,
   combineDayAndTime,
@@ -37,21 +38,24 @@ const KIND_STYLES: Record<EventKind, string> = {
 }
 
 type LoadStatus = 'loading' | 'ready' | 'error'
+type View = 'now' | 'calendar' | 'projects'
 
 interface CalendarScreenProps {
   user: AuthUser
   onLoggedOut: () => void
   onUnauthorized: () => void
-  initialView?: 'now' | 'calendar'
+  initialView?: View
 }
 
 export default function CalendarScreen({
   user,
   onLoggedOut,
   onUnauthorized,
-  initialView = 'now',
+  initialView,
 }: CalendarScreenProps) {
-  const [view, setView] = useState<'now' | 'calendar'>(initialView)
+  const [view, setView] = useState<View>(
+    () => initialView ?? (window.innerWidth >= 1024 ? 'calendar' : 'now'),
+  )
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()))
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
@@ -229,7 +233,7 @@ export default function CalendarScreen({
             </div>
           </div>
 
-          <div className="flex gap-2 lg:hidden" role="tablist" aria-label="Vue">
+          <div className="flex gap-2" role="tablist" aria-label="Vue">
             <button
               type="button"
               role="tab"
@@ -256,10 +260,23 @@ export default function CalendarScreen({
             >
               Calendrier
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'projects'}
+              onClick={() => setView('projects')}
+              className={`rounded-full px-4 py-1.5 text-sm transition ${
+                view === 'projects'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Projets
+            </button>
           </div>
 
           <div
-            className={`flex items-center gap-2 ${view === 'calendar' ? '' : 'hidden lg:flex'}`}
+            className={`flex items-center gap-2 ${view === 'calendar' ? '' : 'hidden'}`}
             role="group"
             aria-label="Navigation dans le calendrier"
           >
@@ -294,7 +311,7 @@ export default function CalendarScreen({
             <NowPanel onUnauthorized={onUnauthorized} />
           </div>
 
-          <div className={view === 'calendar' ? 'block' : 'hidden lg:block'}>
+          <div className={view === 'calendar' ? 'block' : 'hidden'}>
           <section
             aria-label={`Calendrier du ${formatLongDay(selectedDay)}`}
             className="rounded-3xl border border-ink/10 bg-white/40 p-4 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] sm:p-6"
@@ -378,7 +395,7 @@ export default function CalendarScreen({
           </section>
           </div>
 
-          <div className={view === 'calendar' ? 'block' : 'hidden lg:block'}>
+          <div className={view === 'calendar' ? 'block' : 'hidden'}>
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <form
               onSubmit={handleSubmit}
@@ -483,6 +500,10 @@ export default function CalendarScreen({
               fixe ou planifié est refusé avec une explication.
             </p>
           </aside>
+          </div>
+
+          <div className={view === 'projects' ? 'block lg:col-span-2' : 'hidden'}>
+            {view === 'projects' && <ProjectsPanel onUnauthorized={onUnauthorized} />}
           </div>
         </div>
       </div>

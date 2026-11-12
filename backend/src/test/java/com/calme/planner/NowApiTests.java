@@ -191,6 +191,26 @@ class NowApiTests {
     }
 
     @Test
+    void plannedEventCoveringTheWindowAlsoLeavesNoSlot() throws Exception {
+        createTask("Relire le plan", 15, TaskPriority.NORMAL);
+        Long userId = jdbcTemplate.queryForObject(
+                "select id from app_user where lower(email) = lower('local@calme.invalid')",
+                Long.class);
+        jdbcTemplate.update("""
+                insert into event (user_id, title, start_at, end_at, kind, created_by)
+                values (?, 'Rédaction planifiée', ?, ?, 'PLANNED', 'USER')
+                """,
+                userId,
+                OffsetDateTime.parse("2026-11-12T17:30:00Z"),
+                OffsetDateTime.parse("2026-11-12T22:00:00Z"));
+
+        mockMvc.perform(get("/api/now"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.task").value(nullValue()))
+                .andExpect(jsonPath("$.message", containsString("Rien ne rentre")));
+    }
+
+    @Test
     void rejectsInvalidTaskInput() throws Exception {
         mockMvc.perform(post("/api/tasks")
                         .contentType(MediaType.APPLICATION_JSON)

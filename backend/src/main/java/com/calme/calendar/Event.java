@@ -2,6 +2,7 @@ package com.calme.calendar;
 
 import java.time.Instant;
 
+import com.calme.tasks.Task;
 import com.calme.user.AppUser;
 
 import jakarta.persistence.Column;
@@ -61,6 +62,18 @@ public class Event {
         this.endAt = endAt;
         this.kind = kind;
         this.createdBy = createdBy;
+    }
+
+    public Event(
+            AppUser user,
+            Task task,
+            String title,
+            Instant startAt,
+            Instant endAt,
+            EventKind kind,
+            EventCreator createdBy) {
+        this(user, title, startAt, endAt, kind, createdBy);
+        this.taskId = task.getId();
     }
 
     public void update(String title, Instant startAt, Instant endAt, EventKind kind) {

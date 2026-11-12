@@ -2,7 +2,7 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur et un planner de base sont en place. Le planner complet (projets, dépendances), l'agent, le digest et les projets ne sont pas encore implémentés.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base et le planner de projets (F5) sont en place. L'agent, le digest et la replanification/édition avancée des projets restent à faire.
 
 ## Ce qui fonctionne
 
@@ -13,6 +13,8 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Écran « Maintenant » : une seule action, énergie déclarée en un tap, boutons « Je commence », « Plus tard » et « Trop lourd ce soir ».
 - Planner de base : capacité 60/40/30 % selon l'énergie, tâches de 25 min maximum, titres de 80 caractères maximum, créneaux libres hors événements fixes, report des tâches non critiques en énergie basse.
 - Ajout manuel de tâches et seed des 14 blocs d'alternance ; le bloc courant est affiché.
+- Projets (F5) : objectif et échéance, étapes avec durées, dépendances validées en DAG, buffer de 20 % minimum, planification dans les créneaux libres et suivi de progression.
+- Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
@@ -138,7 +140,30 @@ curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/now/start \
   -H 'Content-Type: application/json' -d '{"taskId":1}'
 ```
 
-Le planner ne place jamais une tâche sur un événement fixe. En énergie `LOW`, les tâches non critiques dues aujourd'hui sont reportées à demain et seules les tâches critiques restent proposées. Les dépendances de projets ne sont pas encore implémentées.
+Le planner ne place jamais une tâche sur un événement fixe ou déjà planifié. En énergie `LOW`, les tâches non critiques dues aujourd'hui sont reportées à demain et seules les tâches critiques restent proposées.
+
+### Projets
+
+```bash
+# Liste des projets
+curl -b /tmp/calme-cookies.txt http://localhost:8080/api/projects
+
+# Création d'un projet avec étapes et dépendances
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/projects \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title":"Mémoire",
+    "goal":"Finir le chapitre 2",
+    "deadline":"2026-11-30",
+    "bufferRatio":0.20,
+    "steps":[
+      {"title":"Cadrage","estimateMin":30,"estimateMax":30,"priority":"NORMAL","dependsOn":[]},
+      {"title":"Rédaction","estimateMin":60,"estimateMax":60,"priority":"NORMAL","dependsOn":[0]}
+    ]
+  }'
+```
+
+Les dépendances forment un DAG validé côté backend. Chaque étape est planifiée après ses dépendances, hors événements fixes ou déjà planifiés, avec un buffer de 20 % minimum. Si les créneaux sont insuffisants, l'API répond `409` et n'écrit rien.
 
 ## Tests et vérifications
 
@@ -153,7 +178,7 @@ cd frontend && npm ci && npm test && npm run build
 python3 scripts/validate_fixtures.py
 ```
 
-La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 30 tests backend et 18 tests frontend.
+La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 43 tests backend et 23 tests frontend.
 
 ## Structure
 
@@ -164,6 +189,7 @@ backend/                 Spring Boot 3.5, Java 21, Flyway
   src/main/java/com/calme/tasks/      tâches manuelles
   src/main/java/com/calme/planner/    règles pures et écran Maintenant
   src/main/java/com/calme/energy/     énergie déclarée
+  src/main/java/com/calme/projects/   projets, dépendances et planification
   src/main/java/com/calme/blocks/     blocs d'alternance et bloc courant
   src/main/java/com/calme/user/       utilisateur local
   src/main/resources/db/migration/    V1 à V4
@@ -175,7 +201,7 @@ fixtures/                données de départ vérifiables
 
 ## Décisions encore ouvertes
 
-L'authentification et les disponibilités par défaut du MVP sont tranchées et documentées dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
+L'authentification, les disponibilités par défaut et le planner de projets du MVP sont tranchés et documentés dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
 
 ## Travailler avec DeepSeek Harness
 

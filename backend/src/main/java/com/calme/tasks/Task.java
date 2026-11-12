@@ -65,7 +65,19 @@ public class Task {
             int estimateMax,
             TaskPriority priority,
             LocalDate dueDate) {
+        this(user, null, title, estimateMin, estimateMax, priority, dueDate);
+    }
+
+    public Task(
+            AppUser user,
+            Long projectId,
+            String title,
+            int estimateMin,
+            int estimateMax,
+            TaskPriority priority,
+            LocalDate dueDate) {
         this.user = user;
+        this.projectId = projectId;
         this.title = title;
         this.estimateMin = estimateMin;
         this.estimateMax = estimateMax;
@@ -86,6 +98,10 @@ public class Task {
     public void deferTo(LocalDate deferDate) {
         this.status = TaskStatus.TODO;
         this.dueDate = deferDate;
+    }
+
+    public void scheduleFor(LocalDate scheduledDate) {
+        this.dueDate = scheduledDate;
     }
 
     public Long getId() {

@@ -15,8 +15,8 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 - [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
 - [x] Mettre en place l'authentification mono-utilisateur (F1). *(session + BCrypt, sans 2FA)*
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
-  - [x] Entités `AppUser`, `Event`, `Task`, `EnergyLog` et `Block`.
-  - [ ] Entités `Project`, `TaskDependency` et `Settings`.
+  - [x] Entités `AppUser`, `Event`, `Task`, `EnergyLog`, `Block`, `Project` et `TaskDependency`.
+  - [ ] Entité `Settings`.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
   - [x] CRUD manuel (API + UI), conflits signalés et barre « maintenant ».
   - [ ] CRUD via l'agent.
@@ -24,9 +24,9 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 
 ## Semaine 2 — Planner
 
-- [ ] Implémenter et tester les règles pures de capacité, énergie, dépendances et conflits.
+- [x] Implémenter et tester les règles pures de capacité, énergie, dépendances et conflits.
   - [x] Capacité, énergie, conflits et sélection de l'action « Maintenant ».
-  - [ ] Dépendances de tâches et planner de projets (F5).
+  - [x] Dépendances de tâches et planner de projets (F5).
 - [ ] Importer et éditer les blocs d'alternance (F7).
   - [x] Seed des 14 blocs et affichage du bloc courant.
   - [ ] Import/édition depuis les réglages.
@@ -45,6 +45,9 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 
 - [ ] Ajouter le digest quotidien (F9), uniquement après décisions sur l'heure et le fournisseur email.
 - [ ] Finaliser projets, suivi et replanification dans le périmètre MVP (F5).
+  - [x] Création d'un projet avec étapes, dépendances, buffer ≥ 20 % et planification.
+  - [x] Suivi de progression et marquage terminé.
+  - [ ] Replanification et édition avancée.
 - [ ] Appliquer le design system et vérifier desktop/mobile.
 - [ ] Préparer déploiement, configuration de sauvegardes et procédure de restauration.
 - **Jalon :** usage réel quotidien pendant une semaine.
