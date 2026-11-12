@@ -46,7 +46,7 @@ describe('App authentification', () => {
     expect(screen.getByText(LOCAL_EMAIL)).toBeInTheDocument()
   })
 
-  it('se connecte et affiche le calendrier', async () => {
+  it('se connecte et affiche l’agent', async () => {
     let loginBody: Record<string, unknown> | null = null
     stubFetch((url, init) => {
       if (url.includes('/api/auth/me')) {
@@ -62,6 +62,9 @@ describe('App authentification', () => {
       if (url.includes('/api/events')) {
         return response([])
       }
+      if (url.includes('/api/agent/messages')) {
+        return response([])
+      }
       return response({}, 404)
     })
 
@@ -72,10 +75,11 @@ describe('App authentification', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Entrer' }))
 
     expect(await screen.findByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /parle à calme/i })).toBeInTheDocument()
     expect(loginBody).toEqual({ password: 'secret' })
   })
 
-  it('ouvre directement le calendrier avec une session existante', async () => {
+  it('ouvre directement l’agent avec une session existante', async () => {
     stubFetch((url) => {
       if (url.includes('/api/auth/me')) {
         return response({ email: LOCAL_EMAIL })
@@ -86,12 +90,16 @@ describe('App authentification', () => {
       if (url.includes('/api/events')) {
         return response([])
       }
+      if (url.includes('/api/agent/messages')) {
+        return response([])
+      }
       return response({}, 404)
     })
 
     render(<App />)
 
     expect(await screen.findByRole('heading', { name: /une journée à la fois/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /parle à calme/i })).toBeInTheDocument()
   })
 
   it('affiche calmement un mauvais mot de passe', async () => {
@@ -127,6 +135,9 @@ describe('App authentification', () => {
         return response(REST_NOW)
       }
       if (url.includes('/api/events')) {
+        return response([])
+      }
+      if (url.includes('/api/agent/messages')) {
         return response([])
       }
       if (url.includes('/api/auth/logout') && init?.method === 'POST') {

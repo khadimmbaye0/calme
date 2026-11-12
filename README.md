@@ -2,7 +2,7 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets + journal ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base, le planner de projets (F5) et le journal/undo (F8) sont en place. L'agent LLM, le digest et la replanification/édition avancée des projets restent à faire.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets + journal + agent ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base, le planner de projets (F5), le journal/undo (F8) et l'agent conversationnel (F4) sont en place. Le digest, l'évaluation des variantes de commandes et la replanification/édition avancée des projets restent à faire.
 
 ## Ce qui fonctionne
 
@@ -16,6 +16,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Projets (F5) : objectif et échéance, étapes avec durées, dépendances validées en DAG, buffer de 20 % minimum, planification dans les créneaux libres et suivi de progression.
 - Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
 - Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
+- Agent (F4) : chat en langage naturel, outils calendrier/tâches/projets/énergie/journal, confirmations pour les suppressions et les plans volumineux, journal/undo.
 - Interface minimaliste : papier chaud, titres Fraunces, cartes filaires, aucune animation décorative ; les changements d'état sont instantanés.
 - Déploiement en une commande : `./scripts/up.sh` ou `make up`, avec healthchecks, génération des secrets locaux et port frontend unique.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
@@ -33,7 +34,9 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 
 <img src="docs/screenshots/connexion.png" alt="Écran de connexion Calme" width="720">
 
-<img src="docs/screenshots/accueil-desktop.png" alt="Écran principal Calme" width="720">
+<img src="docs/screenshots/agent.png" alt="Agent conversationnel Calme" width="720">
+
+<img src="docs/screenshots/accueil-desktop.png" alt="Écran calendrier Calme" width="720">
 
 ## Démarrage en une commande
 
@@ -121,11 +124,27 @@ npm run dev
 
 Vite sert l'application sur <http://localhost:5173> et proxyfie `/api` vers `http://localhost:8080`.
 
-## DeepSeek
+## Agent et DeepSeek
 
-La clé DeepSeek est lue depuis `DEEPSEEK_API_KEY` dans `.env` (fichier non versionné) et transmise au backend. Le mode par défaut est `simulated` et le modèle par défaut `deepseek-flash`, modifiable avec `DEEPSEEK_MODEL`.
+L'agent est l'écran central. Il utilise le tool calling DeepSeek : le modèle propose des appels d'outils, le backend valide et exécute via les services métier, puis journalise l'action.
 
-L'agent LLM n'est pas encore branché : la clé et la configuration sont prêtes pour l'étape suivante, mais aucun appel réel avec des données utilisateur n'est effectué. La politique de données DeepSeek reste la question 8 de [`docs/QUESTIONS.md`](docs/QUESTIONS.md).
+```bash
+# Envoyer une phrase à l'agent
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"Ajoute un cours demain de 9h à 10h."}'
+
+# Historique de la conversation
+curl -b /tmp/calme-cookies.txt http://localhost:5173/api/agent/messages
+
+# Confirmer ou annuler une action proposée
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/confirm/<id>
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/cancel/<id>
+```
+
+La clé est lue depuis `DEEPSEEK_API_KEY` dans `.env` (non versionné). `CALME_LLM_MODE=deepseek` active l'agent réel ; le mode `simulated` reste disponible et ne fait aucun appel réseau. Le modèle par défaut est `deepseek-flash`, modifiable avec `DEEPSEEK_MODEL`.
+
+Les messages, la date, le bloc, l'énergie et les données nécessaires aux outils (titres, créneaux) transitent par DeepSeek. N'y mets pas de données confidentielles. La politique de données est cadrée dans [`docs/DECISIONS.md`](docs/DECISIONS.md) ; le mode simulé reste le défaut d'un déploiement sans clé.
 
 ## API calendrier et authentification
 
@@ -230,7 +249,7 @@ cd frontend && npm ci && npm test && npm run build
 python3 scripts/validate_fixtures.py
 ```
 
-La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 50 tests backend et 25 tests frontend.
+La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 57 tests backend et 28 tests frontend.
 
 ## Structure
 
@@ -243,6 +262,7 @@ backend/                 Spring Boot 3.5, Java 21, Flyway
   src/main/java/com/calme/energy/     énergie déclarée
   src/main/java/com/calme/projects/   projets, dépendances et planification
   src/main/java/com/calme/journal/    journal, inverses et annulation
+  src/main/java/com/calme/agent/      boucle LLM, outils et conversation
   src/main/java/com/calme/blocks/     blocs d'alternance et bloc courant
   src/main/java/com/calme/user/       utilisateur local
   src/main/resources/db/migration/    V1 à V4
@@ -254,7 +274,7 @@ fixtures/                données de départ vérifiables
 
 ## Décisions encore ouvertes
 
-L'authentification, les disponibilités par défaut et le planner de projets du MVP sont tranchés et documentés dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
+L'authentification, les disponibilités par défaut et le planner de projets du MVP sont tranchés et documentés dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
 
 ## Travailler avec DeepSeek Harness
 
