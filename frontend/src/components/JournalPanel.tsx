@@ -67,7 +67,7 @@ export default function JournalPanel({ onUnauthorized }: JournalPanelProps) {
   }
 
   return (
-    <section className="rounded-3xl border border-ink/10 bg-white/40 p-5 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] sm:p-6">
+    <section className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
       <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Journal</p>
       <h2 className="mt-1 font-serif text-2xl leading-tight">Les dernières actions, annulables.</h2>
       <p className="mt-2 text-sm leading-relaxed text-ink/50">
@@ -97,7 +97,7 @@ export default function JournalPanel({ onUnauthorized }: JournalPanelProps) {
           {entries.map((entry) => (
             <li
               key={entry.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-ink/10 bg-cream/40 p-3"
+              className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-line bg-wash/50 p-3"
             >
               <div className="min-w-0">
                 <p className={`text-sm ${entry.status === 'UNDONE' ? 'text-ink/40 line-through' : 'text-ink/80'}`}>
@@ -112,7 +112,7 @@ export default function JournalPanel({ onUnauthorized }: JournalPanelProps) {
                   type="button"
                   onClick={() => handleUndo(entry.id)}
                   disabled={undoingId === entry.id}
-                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 transition hover:border-ink/30 hover:text-ink disabled:opacity-50"
+                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 hover:border-ink/30 hover:text-ink disabled:opacity-50"
                 >
                   {undoingId === entry.id ? 'Annulation…' : 'Annuler'}
                 </button>

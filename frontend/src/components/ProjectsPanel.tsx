@@ -226,7 +226,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
   }
 
   return (
-    <section className="rounded-3xl border border-ink/10 bg-white/40 p-5 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] sm:p-6">
+    <section className="rounded-2xl border border-line bg-paper p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Projets</p>
@@ -236,7 +236,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
           <button
             type="button"
             onClick={startCreate}
-            className="rounded-full border border-ink/15 px-4 py-1.5 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+            className="rounded-full border border-ink/15 px-4 py-1.5 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
           >
             Nouveau projet
           </button>
@@ -263,7 +263,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                 onChange={(event) => setTitle(event.target.value)}
                 maxLength={160}
                 placeholder="Mémoire"
-                className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
               />
             </label>
             <label className="block">
@@ -274,7 +274,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                 type="date"
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
               />
             </label>
           </div>
@@ -287,7 +287,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
               rows={2}
               maxLength={2000}
               placeholder="Finir le chapitre 2 avec une relecture."
-              className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+              className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
             />
           </label>
 
@@ -297,7 +297,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
 
           <div className="space-y-3">
             {steps.map((step, index) => (
-              <div key={index} className="rounded-2xl border border-ink/10 bg-cream/40 p-4">
+              <div key={index} className="rounded-2xl border border-line bg-wash/50 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink/45">
                     Étape {index + 1}
@@ -320,7 +320,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                     onChange={(event) => updateStep(index, { title: event.target.value })}
                     maxLength={160}
                     placeholder={`Titre de l'étape ${index + 1}`}
-                    className="w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                    className="w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
                   />
                 </label>
 
@@ -332,7 +332,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                     <select
                       value={step.estimate}
                       onChange={(event) => updateStep(index, { estimate: Number(event.target.value) })}
-                      className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                      className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
                     >
                       {[15, 30, 45, 60].map((minutes) => (
                         <option key={minutes} value={minutes}>
@@ -351,7 +351,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                         {steps.slice(0, index).map((_, dependencyIndex) => (
                           <label
                             key={dependencyIndex}
-                            className="flex items-center gap-1.5 rounded-full border border-ink/10 px-2 py-1 text-[11px] text-ink/55"
+                            className="flex items-center gap-1.5 rounded-full border border-line px-2 py-1 text-[11px] text-ink/55"
                           >
                             <input
                               type="checkbox"
@@ -374,14 +374,14 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
             <button
               type="button"
               onClick={() => setSteps((current) => [...current, blankStep()])}
-              className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
             >
               Ajouter une étape
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-cream transition hover:bg-terracotta/90 disabled:opacity-50"
+              className="rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-50"
             >
               {submitting ? 'Planification…' : 'Créer le projet'}
             </button>
@@ -391,7 +391,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                 setCreating(false)
                 resetForm()
               }}
-              className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
             >
               Annuler
             </button>
@@ -410,7 +410,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="text-xs text-ink/45 underline-offset-4 transition hover:text-ink hover:underline"
+            className="text-xs text-ink/45 underline-offset-4 hover:text-ink hover:underline"
           >
             ← Tous les projets
           </button>
@@ -430,7 +430,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
 
           <div className="mt-5 space-y-2">
             {selected.steps.map((step) => (
-              <div key={step.taskId} className="rounded-2xl border border-ink/10 bg-cream/40 p-3">
+              <div key={step.taskId} className="rounded-2xl border border-line bg-wash/50 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-medium">{step.title}</p>
@@ -457,7 +457,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                       type="button"
                       onClick={() => handleDone(step.taskId)}
                       disabled={actingTaskId === step.taskId}
-                      className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 transition hover:border-ink/30 hover:text-ink disabled:opacity-50"
+                      className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 hover:border-ink/30 hover:text-ink disabled:opacity-50"
                     >
                       Terminer
                     </button>
@@ -482,7 +482,7 @@ export default function ProjectsPanel({ onUnauthorized }: ProjectsPanelProps) {
                   key={project.id}
                   type="button"
                   onClick={() => openProject(project.id)}
-                  className="w-full rounded-2xl border border-ink/10 bg-cream/40 p-4 text-left transition hover:border-ink/30"
+                  className="w-full rounded-2xl border border-line bg-wash/50 p-4 text-left hover:border-ink/30"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>

@@ -158,7 +158,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
   const blockLabel = now?.blockType ? BLOCK_LABELS[now.blockType] : 'Hors bloc'
 
   return (
-    <section className="rounded-3xl border border-ink/10 bg-white/55 p-5 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] lg:sticky lg:top-8">
+    <section className="rounded-2xl border border-line bg-paper p-5 lg:sticky lg:top-8">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-terracotta">Maintenant</p>
         <span className="text-[11px] text-ink/35">{blockLabel}</span>
@@ -174,10 +174,10 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
               onClick={() => handleEnergy(level)}
               disabled={acting}
               aria-pressed={active}
-              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition disabled:opacity-50 ${
+              className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] disabled:opacity-50 ${
                 active
                   ? 'border-terracotta/40 bg-terracotta/10 text-ink'
-                  : 'border-ink/10 text-ink/50 hover:border-ink/25'
+                  : 'border-line text-ink/50 hover:border-ink/25'
               }`}
             >
               <span
@@ -211,7 +211,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
                 type="button"
                 onClick={handleDone}
                 disabled={acting}
-                className="mt-5 w-full rounded-full bg-sage px-4 py-2 text-sm font-medium text-cream transition hover:bg-sage/90 disabled:opacity-50"
+                className="mt-5 w-full rounded-xl bg-sage px-4 py-2 text-sm font-medium text-cream hover:bg-sage/90 disabled:opacity-50"
               >
                 Terminé
               </button>
@@ -228,7 +228,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
                 type="button"
                 onClick={handleStart}
                 disabled={acting}
-                className="mt-5 w-full rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-cream transition hover:bg-terracotta/90 disabled:opacity-50"
+                className="mt-5 w-full rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-50"
               >
                 Je commence
               </button>
@@ -237,7 +237,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
                   type="button"
                   onClick={handleLater}
                   disabled={acting}
-                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 transition hover:border-ink/30 hover:text-ink disabled:opacity-50"
+                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 hover:border-ink/30 hover:text-ink disabled:opacity-50"
                 >
                   Plus tard
                 </button>
@@ -245,7 +245,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
                   type="button"
                   onClick={handleTooHeavy}
                   disabled={acting}
-                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 transition hover:border-ink/30 hover:text-ink disabled:opacity-50"
+                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/60 hover:border-ink/30 hover:text-ink disabled:opacity-50"
                 >
                   Trop lourd ce soir
                 </button>
@@ -268,7 +268,7 @@ export default function NowPanel({ onUnauthorized }: NowPanelProps) {
         </p>
       )}
 
-      <div className="mt-6 border-t border-ink/10 pt-4">
+      <div className="mt-6 border-t border-line pt-4">
         <TaskForm onCreated={load} onUnauthorized={onUnauthorized} />
       </div>
     </section>

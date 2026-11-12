@@ -35,7 +35,7 @@ const KIND_LABELS: Record<EventKind, string> = {
 const KIND_STYLES: Record<EventKind, string> = {
   FIXED: 'border-sage/45 bg-sage/20 text-ink',
   PLANNED: 'border-terracotta/35 bg-terracotta/15 text-ink',
-  AVAILABILITY: 'border-ink/10 bg-ink/5 text-ink/70',
+  AVAILABILITY: 'border-line bg-ink/5 text-ink/70',
 }
 
 type LoadStatus = 'loading' | 'ready' | 'error'
@@ -221,26 +221,26 @@ export default function CalendarScreen({
               </p>
             </div>
 
-            <div className="flex flex-col items-end gap-1">
+            <div className="ml-auto flex flex-col items-end gap-1">
               <button
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="text-xs text-ink/50 underline-offset-4 transition hover:text-ink hover:underline disabled:opacity-50"
+                className="text-xs text-ink/50 underline-offset-4 hover:text-ink hover:underline disabled:opacity-50"
               >
                 {loggingOut ? 'Déconnexion…' : 'Se déconnecter'}
               </button>
-              <span className="text-[11px] text-ink/35">{user.email}</span>
+              <span className="hidden text-[11px] text-ink/35 sm:block">{user.email}</span>
             </div>
           </div>
 
-          <div className="flex gap-2" role="tablist" aria-label="Vue">
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Vue">
             <button
               type="button"
               role="tab"
               aria-selected={view === 'now'}
               onClick={() => setView('now')}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
+              className={`rounded-full px-4 py-1.5 text-sm ${
                 view === 'now'
                   ? 'bg-ink text-cream'
                   : 'border border-ink/15 text-ink/70 hover:border-ink/30'
@@ -253,7 +253,7 @@ export default function CalendarScreen({
               role="tab"
               aria-selected={view === 'calendar'}
               onClick={() => setView('calendar')}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
+              className={`rounded-full px-4 py-1.5 text-sm ${
                 view === 'calendar'
                   ? 'bg-ink text-cream'
                   : 'border border-ink/15 text-ink/70 hover:border-ink/30'
@@ -266,7 +266,7 @@ export default function CalendarScreen({
               role="tab"
               aria-selected={view === 'projects'}
               onClick={() => setView('projects')}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
+              className={`rounded-full px-4 py-1.5 text-sm ${
                 view === 'projects'
                   ? 'bg-ink text-cream'
                   : 'border border-ink/15 text-ink/70 hover:border-ink/30'
@@ -279,7 +279,7 @@ export default function CalendarScreen({
               role="tab"
               aria-selected={view === 'journal'}
               onClick={() => setView('journal')}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
+              className={`rounded-full px-4 py-1.5 text-sm ${
                 view === 'journal'
                   ? 'bg-ink text-cream'
                   : 'border border-ink/15 text-ink/70 hover:border-ink/30'
@@ -298,14 +298,14 @@ export default function CalendarScreen({
               type="button"
               onClick={() => changeDay(addDays(selectedDay, -1))}
               aria-label="Jour précédent"
-              className="rounded-full border border-ink/15 px-3 py-1.5 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-ink/15 px-3 py-1.5 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
             >
               ←
             </button>
             <button
               type="button"
               onClick={() => changeDay(new Date())}
-              className="rounded-full border border-ink/15 px-4 py-1.5 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-ink/15 px-4 py-1.5 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
             >
               Aujourd'hui
             </button>
@@ -313,7 +313,7 @@ export default function CalendarScreen({
               type="button"
               onClick={() => changeDay(addDays(selectedDay, 1))}
               aria-label="Jour suivant"
-              className="rounded-full border border-ink/15 px-3 py-1.5 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink"
+              className="rounded-full border border-ink/15 px-3 py-1.5 text-sm text-ink/70 hover:border-ink/30 hover:text-ink"
             >
               →
             </button>
@@ -328,7 +328,7 @@ export default function CalendarScreen({
           <div className={view === 'calendar' ? 'block' : 'hidden'}>
           <section
             aria-label={`Calendrier du ${formatLongDay(selectedDay)}`}
-            className="rounded-3xl border border-ink/10 bg-white/40 p-4 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)] sm:p-6"
+            className="rounded-2xl border border-line bg-paper p-4 sm:p-6"
           >
             <div className="mb-5 flex items-baseline justify-between gap-4">
               <h2 className="font-serif text-2xl capitalize">{formatLongDay(selectedDay)}</h2>
@@ -347,7 +347,7 @@ export default function CalendarScreen({
               <p className="mb-4 text-sm text-ink/55">Rien de prévu. La journée peut rester libre.</p>
             )}
 
-            <div className="relative h-[72rem] overflow-hidden rounded-2xl bg-cream/40">
+            <div className="relative h-[72rem] overflow-hidden rounded-2xl bg-wash/50">
               {HOURS.map((hour) => (
                 <div
                   key={hour}
@@ -380,7 +380,7 @@ export default function CalendarScreen({
                     onClick={() => selectEvent(event)}
                     aria-label={`${event.title}, ${KIND_LABELS[event.kind]}, de ${formatTime(event.startAt)} à ${formatTime(event.endAt)}`}
                     aria-pressed={editing?.id === event.id}
-                    className={`absolute left-12 right-3 overflow-hidden rounded-xl border px-2 py-1 text-left text-xs transition hover:shadow-sm ${KIND_STYLES[event.kind]} ${
+                    className={`absolute left-12 right-3 overflow-hidden rounded-xl border px-2 py-1 text-left text-xs ${KIND_STYLES[event.kind]} ${
                       isAvailability ? 'z-0 opacity-80' : 'z-10'
                     } ${editing?.id === event.id ? 'ring-2 ring-terracotta/45' : ''}`}
                     style={{ top: `${top}px`, height: `${height}px` }}
@@ -413,7 +413,7 @@ export default function CalendarScreen({
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <form
               onSubmit={handleSubmit}
-              className="rounded-3xl border border-ink/10 bg-white/55 p-5 shadow-[0_24px_60px_-48px_rgba(43,38,32,0.55)]"
+              className="rounded-2xl border border-line bg-paper p-5"
             >
               <h2 className="font-serif text-xl">{editing ? 'Modifier ce moment' : 'Ajouter un moment'}</h2>
               <p className="mt-1 text-xs leading-relaxed text-ink/45">
@@ -428,7 +428,7 @@ export default function CalendarScreen({
                     onChange={(event) => setTitle(event.target.value)}
                     maxLength={160}
                     placeholder="Relire le plan du chapitre 2"
-                    className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition placeholder:text-ink/30 focus:border-terracotta/60"
+                    className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none placeholder:text-ink/30 focus:border-terracotta/60"
                   />
                 </label>
 
@@ -440,7 +440,7 @@ export default function CalendarScreen({
                       value={startTime}
                       onChange={(event) => setStartTime(event.target.value)}
                       step={300}
-                      className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                      className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
                     />
                   </label>
                   <label className="block">
@@ -450,7 +450,7 @@ export default function CalendarScreen({
                       value={endTime}
                       onChange={(event) => setEndTime(event.target.value)}
                       step={300}
-                      className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                      className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
                     />
                   </label>
                 </div>
@@ -460,7 +460,7 @@ export default function CalendarScreen({
                   <select
                     value={kind}
                     onChange={(event) => setKind(event.target.value as EventKind)}
-                    className="mt-1 w-full rounded-xl border border-ink/15 bg-cream/60 px-3 py-2 text-sm outline-none transition focus:border-terracotta/60"
+                    className="mt-1 w-full rounded-xl border border-ink/15 bg-wash px-3 py-2 text-sm outline-none focus:border-terracotta/60"
                   >
                     {(Object.keys(KIND_LABELS) as EventKind[]).map((value) => (
                       <option key={value} value={value}>
@@ -481,7 +481,7 @@ export default function CalendarScreen({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-full bg-terracotta px-4 py-2 text-sm font-medium text-cream transition hover:bg-terracotta/90 disabled:opacity-50"
+                  className="rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-50"
                 >
                   {submitting ? 'Enregistrement…' : editing ? 'Enregistrer' : 'Ajouter'}
                 </button>
@@ -490,7 +490,7 @@ export default function CalendarScreen({
                     type="button"
                     onClick={resetForm}
                     disabled={submitting}
-                    className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 transition hover:border-ink/30 hover:text-ink disabled:opacity-50"
+                    className="rounded-full border border-ink/15 px-4 py-2 text-sm text-ink/70 hover:border-ink/30 hover:text-ink disabled:opacity-50"
                   >
                     Annuler
                   </button>
@@ -502,7 +502,7 @@ export default function CalendarScreen({
                   type="button"
                   onClick={handleDelete}
                   disabled={submitting}
-                  className="mt-3 text-xs text-ink/50 underline-offset-4 transition hover:text-ink hover:underline disabled:opacity-50"
+                  className="mt-3 text-xs text-ink/50 underline-offset-4 hover:text-ink hover:underline disabled:opacity-50"
                 >
                   Supprimer ce moment
                 </button>

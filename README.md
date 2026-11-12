@@ -16,6 +16,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Projets (F5) : objectif et échéance, étapes avec durées, dépendances validées en DAG, buffer de 20 % minimum, planification dans les créneaux libres et suivi de progression.
 - Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
 - Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
+- Interface minimaliste : papier chaud, titres Fraunces, cartes filaires, aucune animation décorative ; les changements d'état sont instantanés.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
@@ -25,6 +26,12 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Java 21 et Maven 3.9+
 - Node.js 22.12+ et npm
 - Docker et Docker Compose
+
+## Aperçu
+
+<img src="docs/screenshots/connexion.png" alt="Écran de connexion Calme" width="720">
+
+<img src="docs/screenshots/accueil-desktop.png" alt="Écran principal Calme" width="720">
 
 ## Démarrage rapide avec Docker Compose
 

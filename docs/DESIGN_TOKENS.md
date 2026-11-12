@@ -5,6 +5,9 @@
 | Token | Valeur | Usage |
 |---|---|---|
 | `color-bg` | `#FAF6EE` | Fond crème |
+| `color-paper` | `#FFFDF8` | Surface des cartes |
+| `color-wash` | `#F3ECDF` | Champs et zones secondaires |
+| `color-line` | `#E7DFD2` | Bordures filaires |
 | `color-text` | `#2B2620` | Texte brun foncé |
 | `color-accent` | `#C4704B` | Accent terracotta doux |
 | `color-done` | `#8AA07C` | État terminé, vert sauge |
@@ -12,9 +15,10 @@
 
 ## Typographie et forme
 
-- Titres serif (Fraunces ou Lora, choix de police à confirmer au moment de l'implémentation).
-- Corps sans-serif lisible (Inter proposé).
-- Espacement généreux, rayons arrondis, ombres très légères.
+- Titres serif : **Fraunces** retenu pour l'implémentation, avec repli Iowan/Palatino/Georgia.
+- Corps sans-serif système lisible (SF Pro, Helvetica Neue, Segoe UI), sans police externe supplémentaire.
+- Espacement généreux, cartes à bords filaires, rayons doux (16 px), pas d'ombre décorative.
+- Animations supprimées : changements d'état instantanés, focus visible, respect de `prefers-reduced-motion`.
 - Interactions en un ou deux gestes ; une décision par écran.
 
 ## Interdits produit
