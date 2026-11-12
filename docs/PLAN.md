@@ -15,8 +15,11 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 - [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
 - [ ] Mettre en place l'authentification mono-utilisateur (F1).
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
+  - [x] Entités `AppUser` et `Event` et seed local provisoire.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
-- **Jalon :** créer et modifier des événements manuellement.
+  - [x] CRUD manuel (API + UI), conflits signalés et barre « maintenant ».
+  - [ ] CRUD via l'agent.
+- **Jalon :** créer et modifier des événements manuellement. *(partie manuelle atteinte ; partie agent à faire)*
 
 ## Semaine 2 — Planner
 
