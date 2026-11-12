@@ -1,0 +1,244 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "calendar_list",
+      "description": "Liste les événements entre deux instants ISO-8601 UTC. À utiliser avant de modifier ou supprimer un événement.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to"],
+        "properties": {
+          "from": {"type": "string", "format": "date-time"},
+          "to": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "calendar_create",
+      "description": "Crée un événement. Les heures sont en ISO-8601 UTC.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "start_at", "end_at", "kind"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1, "maxLength": 160},
+          "start_at": {"type": "string", "format": "date-time"},
+          "end_at": {"type": "string", "format": "date-time"},
+          "kind": {"type": "string", "enum": ["FIXED", "PLANNED", "AVAILABILITY"]}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "calendar_update",
+      "description": "Modifie un événement existant. Ne fournis que les champs à changer.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id"],
+        "properties": {
+          "event_id": {"type": "integer"},
+          "title": {"type": "string", "minLength": 1, "maxLength": 160},
+          "start_at": {"type": "string", "format": "date-time"},
+          "end_at": {"type": "string", "format": "date-time"},
+          "kind": {"type": "string", "enum": ["FIXED", "PLANNED", "AVAILABILITY"]}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "calendar_delete",
+      "description": "Supprime un événement existant. Une confirmation utilisateur est toujours demandée.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id"],
+        "properties": {
+          "event_id": {"type": "integer"}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_list",
+      "description": "Liste les tâches ouvertes (TODO ou en cours).",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_create",
+      "description": "Crée une tâche manuelle avec une estimation en minutes.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "estimate_min", "estimate_max", "priority"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1, "maxLength": 160},
+          "estimate_min": {"type": "integer", "minimum": 1},
+          "estimate_max": {"type": "integer", "minimum": 1},
+          "priority": {"type": "string", "enum": ["CRITICAL", "NORMAL", "OPTIONAL"]},
+          "due_date": {"type": "string", "format": "date"}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_start",
+      "description": "Démarre une tâche TODO.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id"],
+        "properties": {"task_id": {"type": "integer"}}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_complete",
+      "description": "Marque une tâche comme terminée.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id"],
+        "properties": {"task_id": {"type": "integer"}}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "task_defer",
+      "description": "Reporte une tâche à demain.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id"],
+        "properties": {"task_id": {"type": "integer"}}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "project_list",
+      "description": "Liste les projets actifs et leur progression.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "project_plan",
+      "description": "Planifie un projet : étapes, références et dépendances. Une confirmation est demandée si le plan touche plus de 10 éléments.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "goal", "deadline", "buffer_ratio", "steps"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1, "maxLength": 160},
+          "goal": {"type": "string", "minLength": 1, "maxLength": 1000},
+          "deadline": {"type": "string", "format": "date"},
+          "buffer_ratio": {"type": "number", "minimum": 0.2, "maximum": 0.8},
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["ref", "title", "estimate_min", "estimate_max", "depends_on"],
+              "properties": {
+                "ref": {"type": "string", "minLength": 1},
+                "title": {"type": "string", "minLength": 1, "maxLength": 160},
+                "estimate_min": {"type": "integer", "minimum": 1},
+                "estimate_max": {"type": "integer", "minimum": 1},
+                "priority": {"type": "string", "enum": ["CRITICAL", "NORMAL", "OPTIONAL"]},
+                "depends_on": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "uniqueItems": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "energy_set",
+      "description": "Déclare l'énergie du jour : LOW, MID ou GOOD.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level"],
+        "properties": {
+          "level": {"type": "string", "enum": ["LOW", "MID", "GOOD"]}
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "now_get",
+      "description": "Retourne l'action proposée par l'écran Maintenant.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "journal_list",
+      "description": "Liste les dernières actions et leur statut.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "journal_undo",
+      "description": "Annule la dernière action applicable, ou une action précise si action_id est fourni.",
+      "parameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action_id": {"type": "integer"}
+        }
+      }
+    }
+  }
+]

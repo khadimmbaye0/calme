@@ -11,6 +11,7 @@ import {
   type EventKind,
 } from '../api/events'
 import NowPanel from './NowPanel'
+import AgentPanel from './AgentPanel'
 import JournalPanel from './JournalPanel'
 import ProjectsPanel from './ProjectsPanel'
 import {
@@ -39,7 +40,7 @@ const KIND_STYLES: Record<EventKind, string> = {
 }
 
 type LoadStatus = 'loading' | 'ready' | 'error'
-type View = 'now' | 'calendar' | 'projects' | 'journal'
+type View = 'agent' | 'now' | 'calendar' | 'projects' | 'journal'
 
 interface CalendarScreenProps {
   user: AuthUser
@@ -54,9 +55,7 @@ export default function CalendarScreen({
   onUnauthorized,
   initialView,
 }: CalendarScreenProps) {
-  const [view, setView] = useState<View>(
-    () => initialView ?? (window.innerWidth >= 1024 ? 'calendar' : 'now'),
-  )
+  const [view, setView] = useState<View>(() => initialView ?? 'agent')
   const [selectedDay, setSelectedDay] = useState(() => startOfDay(new Date()))
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
@@ -235,6 +234,19 @@ export default function CalendarScreen({
           </div>
 
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Vue">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'agent'}
+              onClick={() => setView('agent')}
+              className={`rounded-full px-4 py-1.5 text-sm ${
+                view === 'agent'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Agent
+            </button>
             <button
               type="button"
               role="tab"
@@ -514,6 +526,10 @@ export default function CalendarScreen({
               fixe ou planifié est refusé avec une explication.
             </p>
           </aside>
+          </div>
+
+          <div className={view === 'agent' ? 'block lg:col-span-2' : 'hidden'}>
+            {view === 'agent' && <AgentPanel onUnauthorized={onUnauthorized} />}
           </div>
 
           <div className={view === 'projects' ? 'block lg:col-span-2' : 'hidden'}>

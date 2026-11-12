@@ -60,6 +60,16 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - Une suppression d'événement annulée restaure le même identifiant. L'annulation n'ajoute pas une nouvelle action au journal.
 - Le journal est prêt à recevoir les actions de l'agent LLM, sans lui donner d'écriture directe en base.
 
+## Agent conversationnel (F4, 12 nov. 2026, demandé par l'utilisateur)
+
+- L'agent réel utilise le **tool calling DeepSeek** via `RestClient`, avec `deepseek-flash` par défaut et `deepseek-v4-pro` disponible. `CALME_LLM_MODE=deepseek` active le réel ; `simulated` reste le défaut sans clé.
+- Les outils sont une liste blanche : calendrier, tâches, projets, énergie, Maintenant et journal. Le modèle ne touche jamais la base ; le backend valide puis exécute via les services métier.
+- Suppression d'événement : confirmation obligatoire. Plan de projet de plus de 10 éléments : confirmation. Une confirmation expire après 10 minutes et n'écrit rien avant validation.
+- Les actions réussies sont journalisées par les services existants et annulables. La réponse du chat expose la dernière action annulable.
+- L'historique persistant est limité à 20 messages utiles ; les appels d'outils bruts ne sont pas conservés.
+- Données envoyées à DeepSeek : message, date, bloc, énergie et données minimales nécessaires aux outils (titres, créneaux, ids). Pas de mots de passe, secrets ou données d'entreprise. L'utilisateur a explicitement demandé ce mode réel ; le mode simulé reste disponible.
+- L'agent est l'écran central par défaut ; le reste de l'application reste accessible par onglets.
+
 ## Déploiement local (12 nov. 2026, délégué)
 
 - `./scripts/up.sh` (ou `make up`) prépare `.env`, génère les secrets locaux, construit et démarre la pile, puis attend `/api/health`.
@@ -70,4 +80,4 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 
 ## Non décidé
 
-Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, la politique de données DeepSeek, l'hébergement, le nom définitif et la mémoire de l'agent restent à trancher.
+Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, l'hébergement, le nom définitif, la mémoire de l'agent et l'évaluation des variantes de commandes restent à trancher.

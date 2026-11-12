@@ -3,6 +3,7 @@ package com.calme.web;
 import com.calme.auth.InvalidCredentialsException;
 import com.calme.calendar.EventConflictException;
 import com.calme.calendar.EventNotFoundException;
+import com.calme.agent.AgentConfirmationException;
 import com.calme.journal.JournalNotFoundException;
 import com.calme.journal.JournalStateException;
 import com.calme.projects.ProjectNotFoundException;
@@ -57,6 +58,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ProjectPlanException.class)
     ProblemDetail handleProjectPlan(ProjectPlanException exception) {
         return problem(HttpStatus.CONFLICT, "Projet non planifiable", exception.getMessage());
+    }
+
+    @ExceptionHandler(AgentConfirmationException.class)
+    ProblemDetail handleAgentConfirmation(AgentConfirmationException exception) {
+        return problem(HttpStatus.CONFLICT, "Confirmation expirée", exception.getMessage());
     }
 
     @ExceptionHandler(JournalNotFoundException.class)

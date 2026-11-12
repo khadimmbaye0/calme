@@ -36,8 +36,13 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 ## Semaine 3 — Agent
 
 - [ ] Définir le contrat d'API et les validateurs backend pour chaque intent.
-- [ ] Ajouter `LlmClient` DeepSeek et un mode simulé sans appel réseau.
+  - [x] Outils calendrier, tâches, projets, énergie, Maintenant et journal.
+  - [x] Confirmations suppression et plan volumineux, journal/undo.
+  - [ ] Intents avancés (replanification, allègement dédié, blocs).
+- [x] Ajouter `LlmClient` DeepSeek et un mode simulé sans appel réseau.
 - [ ] Implémenter progressivement les intents MVP, selon les décisions validées.
+  - [x] Chat agent central, tool calling et historique.
+  - [ ] Évaluation des 20 variantes de commandes de référence.
 - [x] Ajouter le journal, l'annulation et les explications (F8). *(actions manuelles ; prêt pour l'agent)*
 - **Jalon :** les commandes de référence fonctionnent sans écriture sur réponse invalide.
 
