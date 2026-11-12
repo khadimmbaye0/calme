@@ -19,6 +19,12 @@ node_modules/
 dist/
 coverage/
 .vite/
+*.tsbuildinfo
+
+# Local build and package caches
+.m2/
+.npm-cache/
+.docker/
 
 # Local data and logs
 *.log
