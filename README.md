@@ -2,14 +2,15 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel ». Le backend, le frontend, PostgreSQL, Docker Compose, la migration Flyway initiale et le CRUD calendrier manuel sont en place. L'authentification, le planner, l'agent, le digest et les projets ne sont pas encore implémentés.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier manuel et la session mono-utilisateur sont en place. Le planner, l'agent, le digest et les projets ne sont pas encore implémentés.
 
 ## Ce qui fonctionne
 
 - Backend Spring Boot 3.5 / Java 21 avec un endpoint de santé `GET /api/health`.
-- CRUD calendrier `GET/POST/PUT/DELETE /api/events` avec validation des conflits et réponses `application/problem+json`.
+- Authentification locale par session, mot de passe BCrypt, un seul compte.
+- CRUD calendrier `GET/POST/PUT/DELETE /api/events` protégé par la session, avec validation des conflits et réponses `application/problem+json`.
 - Vue jour React 19 / Vite / TypeScript : navigation par jour, barre « maintenant » actualisée chaque minute, création, modification et suppression d'événements.
-- PostgreSQL 16, migrations Flyway `V1__initial_schema.sql` et `V2__seed_local_user.sql`.
+- PostgreSQL 16, migrations Flyway `V1__initial_schema.sql`, `V2__seed_local_user.sql` et `V3__add_password_hash.sql`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
 
@@ -27,7 +28,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
    cp .env.example .env
    ```
 
-2. Remplacer `POSTGRES_PASSWORD=replace-locally` par un mot de passe local dans `.env`. Ne jamais committer ce fichier.
+2. Remplacer `POSTGRES_PASSWORD=replace-locally` par une valeur locale dans `.env`, puis y ajouter la variable `CALME_AUTH_PASSWORD` avec un mot de passe local. Ne jamais committer ce fichier.
 
 3. Lancer la pile :
 
@@ -44,6 +45,14 @@ Pour arrêter et supprimer les données locales :
 ```bash
 docker compose down -v
 ```
+
+## Connexion locale
+
+- Compte fixe : `local@calme.invalid`.
+- Mot de passe : la valeur de `CALME_AUTH_PASSWORD` dans `.env`.
+- Session serveur avec cookie `HttpOnly` et `SameSite=Strict`, mot de passe haché en BCrypt, pas de 2FA.
+- Le CSRF est désactivé : c'est un choix assumé pour cette application locale non exposée, avec un cookie `SameSite=Strict`. À revoir avant toute exposition réseau.
+- L'API `/api/events` exige une session. Seuls `/api/health` et `/api/auth/login` sont publics.
 
 ## Développement local
 
@@ -63,7 +72,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-Le backend applique les migrations Flyway au démarrage. `GET /api/health` renvoie `{"status":"UP"}` lorsque la base est joignable.
+Le backend applique les migrations Flyway au démarrage et dérive le hash du compte local depuis `CALME_AUTH_PASSWORD`. `GET /api/health` renvoie `{"status":"UP"}` lorsque la base est joignable.
 
 ### Frontend
 
@@ -75,16 +84,33 @@ npm run dev
 
 Vite sert l'application sur <http://localhost:5173> et proxyfie `/api` vers `http://localhost:8080`.
 
-## API calendrier
+## API calendrier et authentification
 
 ```bash
+# Charger les valeurs locales (dont CALME_AUTH_PASSWORD)
+set -a
+source .env
+set +a
+
+# Connexion : stocke le cookie de session
+curl -c /tmp/calme-cookies.txt -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d "{\"password\":\"$CALME_AUTH_PASSWORD\"}"
+
+# Session courante
+curl -b /tmp/calme-cookies.txt http://localhost:8080/api/auth/me
+
 # Événements d'une journée (bornes ISO-8601, excluantes)
-curl "http://localhost:8080/api/events?from=2026-11-12T00:00:00Z&to=2026-11-13T00:00:00Z"
+curl -b /tmp/calme-cookies.txt \
+  "http://localhost:8080/api/events?from=2026-11-12T00:00:00Z&to=2026-11-13T00:00:00Z"
 
 # Création
-curl -X POST http://localhost:8080/api/events \
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/events \
   -H 'Content-Type: application/json' \
   -d '{"title":"Relire le plan","startAt":"2026-11-12T19:00:00Z","endAt":"2026-11-12T19:15:00Z","kind":"PLANNED"}'
+
+# Déconnexion
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/auth/logout
 ```
 
 Un chevauchement entre événements `FIXED` ou `PLANNED` renvoie `409` avec un Problem Detail et n'écrit rien. Les `AVAILABILITY` peuvent se chevaucher. Les instants sont stockés en UTC et affichés dans le fuseau du navigateur.
@@ -108,9 +134,10 @@ La CI GitHub exécute les tests backend et frontend sur chaque pull request.
 
 ```text
 backend/                 Spring Boot 3.5, Java 21, Flyway
+  src/main/java/com/calme/auth/       session, login/logout, compte local
   src/main/java/com/calme/calendar/   API et règles du calendrier
-  src/main/java/com/calme/user/       utilisateur local provisoire
-  src/main/resources/db/migration/    V1 schéma initial, V2 seed local
+  src/main/java/com/calme/user/       utilisateur local
+  src/main/resources/db/migration/    V1 schéma, V2 seed local, V3 mot de passe
 frontend/                React 19, Vite, TypeScript, Tailwind CSS
 compose.yaml             PostgreSQL + backend + frontend
 docs/                    spécification, plan, décisions, questions, acceptation
@@ -119,7 +146,7 @@ fixtures/                données de départ vérifiables
 
 ## Décisions encore ouvertes
 
-Les choix non confirmés restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) et ne sont pas encodés dans le code. En particulier, l'authentification (question 6) reste à trancher : **l'API calendrier n'est pas protégée et doit rester limitée à un usage local** tant que ce choix n'est pas fait. Les horaires par défaut, l'heure et le fournisseur du digest, la politique de données DeepSeek et la calibration de la capacité restent également ouverts.
+L'authentification est tranchée (session + BCrypt, sans 2FA) et documentée dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix non confirmés restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : disponibilités et horaires par défaut, heure et fournisseur du digest, politique de données DeepSeek, calibration de la capacité, hébergement, nom définitif et mémoire de l'agent.
 
 ## Travailler avec DeepSeek Harness
 

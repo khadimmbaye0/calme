@@ -1,11 +1,13 @@
 package com.calme.web;
 
+import com.calme.auth.InvalidCredentialsException;
 import com.calme.calendar.EventConflictException;
 import com.calme.calendar.EventNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -24,6 +26,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(EventConflictException.class)
     ProblemDetail handleConflict(EventConflictException exception) {
         return problem(HttpStatus.CONFLICT, "Créneau indisponible", exception.getMessage());
+    }
+
+    @ExceptionHandler({AuthenticationException.class, InvalidCredentialsException.class})
+    ProblemDetail handleAuthentication(RuntimeException exception) {
+        return problem(HttpStatus.UNAUTHORIZED, "Identifiants invalides", "Le mot de passe ne correspond pas.");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

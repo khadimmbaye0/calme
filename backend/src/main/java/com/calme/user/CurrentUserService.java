@@ -1,5 +1,9 @@
 package com.calme.user;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,12 +17,19 @@ public class CurrentUserService {
     }
 
     /**
-     * Returns the single local user. Authentication is not implemented yet, so the
-     * application relies on the V2 migration seed instead of a session or token.
+     * Returns the authenticated mono-user. Authentication is a local session, so
+     * the principal name is the seeded account email.
      */
     @Transactional(readOnly = true)
     public AppUser requireCurrentUser() {
-        return users.findFirstByOrderByIdAsc()
-                .orElseThrow(() -> new IllegalStateException("Aucun utilisateur local n'est configuré."));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new AccessDeniedException("Authentification requise.");
+        }
+
+        return users.findByEmailIgnoreCase(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException("Utilisateur authentifié introuvable."));
     }
 }

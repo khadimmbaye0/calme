@@ -7,7 +7,7 @@ Ne pas inventer de réponse à ces questions. Ajouter une décision à `DECISION
 3. Apprentissage de l'énergie : V1 (proposition), pas MVP.
 4. Hébergement final : serveur personnel ou Oracle Cloud Free Tier.
 5. Fuseau horaire et disponibilités par défaut pour les blocs école/entreprise.
-6. Authentification : session ou JWT ; besoin éventuel de 2FA.
+6. ~~Authentification : session ou JWT ; besoin éventuel de 2FA.~~ **Décidé : session locale + BCrypt, sans 2FA (voir DECISIONS.md).**
 7. Fournisseur email : SMTP personnel ou service dédié.
 8. Politique de données DeepSeek : titres de projets/tâches autorisés ou anonymisation.
 9. Mémoire agent au-delà des projets, préférences, énergie et blocs d'alternance.
@@ -19,5 +19,5 @@ Ne pas inventer de réponse à ces questions. Ajouter une décision à `DECISION
 - La question 5 bloque la définition des disponibilités par défaut des fixtures d'alternance.
 - Les questions 1 et 7 bloquent l'envoi réel du digest ; le développement du contenu et des tests simulés peut avancer.
 - La question 8 doit être tranchée avant l'envoi de données réelles au LLM.
-- La question 6 doit être tranchée avant de figer les frontières et tests d'authentification.
+- La question 6 est tranchée : session locale, BCrypt, sans 2FA.
 - Les autres choix ne doivent pas bloquer les fondations indépendantes.

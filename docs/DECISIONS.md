@@ -18,12 +18,19 @@ Ce fichier ne contient que les choix confirmés. Les hypothèses de la spécific
 - Hébergement demandé : dépôt GitHub privé sous `khadimmbaye0`.
 - `main` est la branche stable ; travail par branches courtes et pull requests.
 
+## Authentification locale (12 nov. 2026)
+
+- Session serveur, cookie `HttpOnly` et `SameSite=Strict`, mot de passe haché en BCrypt, mono-utilisateur, sans 2FA.
+- Compte local fixe `local@calme.invalid`. Le mot de passe est fourni par `CALME_AUTH_PASSWORD` au démarrage et n'est jamais commité ; seul son hash BCrypt est stocké en base.
+- CSRF désactivé : choix assumé pour cette application locale non exposée, avec un cookie `SameSite=Strict`. À revoir avant toute exposition réseau.
+- `/api/health` et `/api/auth/login` sont publics ; le reste de `/api` exige une session.
+
 ## Choix d'implémentation du calendrier (12 nov. 2026, délégués)
 
 Ces choix techniques ont été faits pour avancer sans trancher les questions produit ouvertes.
 
-- Un utilisateur local `local@calme.invalid` (UTC) est seedé par la migration `V2` tant que l'authentification n'est pas décidée. Il ne contient ni secret ni mot de passe.
-- L'API calendrier n'est pas authentifiée : elle doit rester limitée à un usage local tant que la question 6 n'est pas tranchée.
+- Un utilisateur local `local@calme.invalid` (UTC) est seedé par la migration `V2` ; son hash BCrypt est dérivé de `CALME_AUTH_PASSWORD` au démarrage.
+- L'API calendrier est protégée par la session locale (voir Authentification locale).
 - Les instants sont stockés en UTC (`timestamptz`) et échangés en ISO-8601 ; l'affichage utilise le fuseau du navigateur.
 - Les événements `FIXED` et `PLANNED` ne peuvent pas se chevaucher : le backend répond `409` avec un Problem Detail, sans écriture. Les `AVAILABILITY` peuvent se chevaucher.
 - Le CRUD manuel est en place ; la partie agent de F2, le journal/undo et les récurrences restent à faire.
