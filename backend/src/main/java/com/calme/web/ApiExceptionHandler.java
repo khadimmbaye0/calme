@@ -3,6 +3,8 @@ package com.calme.web;
 import com.calme.auth.InvalidCredentialsException;
 import com.calme.calendar.EventConflictException;
 import com.calme.calendar.EventNotFoundException;
+import com.calme.journal.JournalNotFoundException;
+import com.calme.journal.JournalStateException;
 import com.calme.projects.ProjectNotFoundException;
 import com.calme.projects.ProjectPlanException;
 import com.calme.tasks.TaskNotFoundException;
@@ -55,6 +57,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ProjectPlanException.class)
     ProblemDetail handleProjectPlan(ProjectPlanException exception) {
         return problem(HttpStatus.CONFLICT, "Projet non planifiable", exception.getMessage());
+    }
+
+    @ExceptionHandler(JournalNotFoundException.class)
+    ProblemDetail handleJournalNotFound(JournalNotFoundException exception) {
+        return problem(HttpStatus.NOT_FOUND, "Action introuvable", exception.getMessage());
+    }
+
+    @ExceptionHandler(JournalStateException.class)
+    ProblemDetail handleJournalState(JournalStateException exception) {
+        return problem(HttpStatus.CONFLICT, "Action non annulable", exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

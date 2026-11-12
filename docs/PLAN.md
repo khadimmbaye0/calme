@@ -15,7 +15,7 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 - [x] Ajouter Docker Compose avec PostgreSQL et Flyway.
 - [x] Mettre en place l'authentification mono-utilisateur (F1). *(session + BCrypt, sans 2FA)*
 - [ ] Définir les entités de base : événements, tâches, projets, blocs et réglages.
-  - [x] Entités `AppUser`, `Event`, `Task`, `EnergyLog`, `Block`, `Project` et `TaskDependency`.
+  - [x] Entités `AppUser`, `Event`, `Task`, `EnergyLog`, `Block`, `Project`, `TaskDependency` et `AgentAction`.
   - [ ] Entité `Settings`.
 - [ ] Réaliser le CRUD calendrier et la vue jour (F2).
   - [x] CRUD manuel (API + UI), conflits signalés et barre « maintenant ».
@@ -38,7 +38,7 @@ Le périmètre de référence est le MVP de `PRODUCT_SPEC.md`. Les jalons ci-des
 - [ ] Définir le contrat d'API et les validateurs backend pour chaque intent.
 - [ ] Ajouter `LlmClient` DeepSeek et un mode simulé sans appel réseau.
 - [ ] Implémenter progressivement les intents MVP, selon les décisions validées.
-- [ ] Ajouter le journal, l'annulation et les explications (F8).
+- [x] Ajouter le journal, l'annulation et les explications (F8). *(actions manuelles ; prêt pour l'agent)*
 - **Jalon :** les commandes de référence fonctionnent sans écriture sur réponse invalide.
 
 ## Semaine 4 — Finition du MVP

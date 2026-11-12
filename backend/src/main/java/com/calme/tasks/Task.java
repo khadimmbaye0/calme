@@ -104,6 +104,11 @@ public class Task {
         this.dueDate = scheduledDate;
     }
 
+    public void restoreState(TaskStatus restoredStatus, LocalDate restoredDueDate) {
+        this.status = restoredStatus;
+        this.dueDate = restoredDueDate;
+    }
+
     public Long getId() {
         return id;
     }

@@ -2,7 +2,7 @@
 
 Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base et le planner de projets (F5) sont en place. L'agent, le digest et la replanification/édition avancée des projets restent à faire.
+> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets + journal ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base, le planner de projets (F5) et le journal/undo (F8) sont en place. L'agent LLM, le digest et la replanification/édition avancée des projets restent à faire.
 
 ## Ce qui fonctionne
 
@@ -15,6 +15,7 @@ Calme est une application personnelle d'organisation pour rendre la prochaine ac
 - Ajout manuel de tâches et seed des 14 blocs d'alternance ; le bloc courant est affiché.
 - Projets (F5) : objectif et échéance, étapes avec durées, dépendances validées en DAG, buffer de 20 % minimum, planification dans les créneaux libres et suivi de progression.
 - Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
+- Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
 - PostgreSQL 16, migrations Flyway `V1` à `V4`.
 - Docker Compose pour lancer la base, le backend et le frontend.
 - Tests backend avec Testcontainers et tests frontend avec Vitest.
@@ -165,6 +166,18 @@ curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/projects \
 
 Les dépendances forment un DAG validé côté backend. Chaque étape est planifiée après ses dépendances, hors événements fixes ou déjà planifiés, avec un buffer de 20 % minimum. Si les créneaux sont insuffisants, l'API répond `409` et n'écrit rien.
 
+### Journal
+
+```bash
+# Les 30 dernières actions
+curl -b /tmp/calme-cookies.txt http://localhost:8080/api/journal
+
+# Annuler la dernière action applicable
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/journal/1/undo
+```
+
+Le journal enregistre les créations/modifications/suppressions d’événements, les tâches, l’énergie et la planification de projets. Seule l’action appliquée la plus récente peut être annulée ; elle est ensuite marquée comme annulée.
+
 ## Tests et vérifications
 
 ```bash
@@ -178,7 +191,7 @@ cd frontend && npm ci && npm test && npm run build
 python3 scripts/validate_fixtures.py
 ```
 
-La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 43 tests backend et 23 tests frontend.
+La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 50 tests backend et 25 tests frontend.
 
 ## Structure
 
@@ -190,6 +203,7 @@ backend/                 Spring Boot 3.5, Java 21, Flyway
   src/main/java/com/calme/planner/    règles pures et écran Maintenant
   src/main/java/com/calme/energy/     énergie déclarée
   src/main/java/com/calme/projects/   projets, dépendances et planification
+  src/main/java/com/calme/journal/    journal, inverses et annulation
   src/main/java/com/calme/blocks/     blocs d'alternance et bloc courant
   src/main/java/com/calme/user/       utilisateur local
   src/main/resources/db/migration/    V1 à V4
