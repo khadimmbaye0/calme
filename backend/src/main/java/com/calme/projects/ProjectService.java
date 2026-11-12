@@ -21,6 +21,8 @@ import com.calme.calendar.Event;
 import com.calme.calendar.EventCreator;
 import com.calme.calendar.EventKind;
 import com.calme.calendar.EventRepository;
+import com.calme.journal.JournalRecorder;
+import com.calme.journal.ProjectPlanInverse;
 import com.calme.planner.AvailabilityWindow;
 import com.calme.planner.BusyInterval;
 import com.calme.planner.PlannerRules;
@@ -48,6 +50,7 @@ public class ProjectService {
     private final EventRepository events;
     private final CurrentUserService currentUser;
     private final BlockService blocks;
+    private final JournalRecorder journal;
     private final Clock clock;
 
     public ProjectService(
@@ -57,6 +60,7 @@ public class ProjectService {
             EventRepository events,
             CurrentUserService currentUser,
             BlockService blocks,
+            JournalRecorder journal,
             Clock clock) {
         this.projects = projects;
         this.tasks = tasks;
@@ -64,6 +68,7 @@ public class ProjectService {
         this.events = events;
         this.currentUser = currentUser;
         this.blocks = blocks;
+        this.journal = journal;
         this.clock = clock;
     }
 
@@ -178,6 +183,11 @@ public class ProjectService {
             slot.day().busy().add(new BusyInterval(slot.start(), slot.end()));
         }
 
+        journal.record(
+                "project.plan",
+                Map.of("projectId", project.getId()),
+                new ProjectPlanInverse(project.getId()),
+                "Projet planifié : « " + project.getTitle() + " ».");
         return detail(project, user);
     }
 

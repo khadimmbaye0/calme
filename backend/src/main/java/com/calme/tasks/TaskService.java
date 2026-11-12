@@ -4,7 +4,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 
+import com.calme.journal.JournalRecorder;
+import com.calme.journal.TaskCreateInverse;
+import com.calme.journal.TaskStateInverse;
 import com.calme.user.AppUser;
 import com.calme.user.CurrentUserService;
 
@@ -16,11 +20,17 @@ public class TaskService {
 
     private final TaskRepository tasks;
     private final CurrentUserService currentUser;
+    private final JournalRecorder journal;
     private final Clock clock;
 
-    public TaskService(TaskRepository tasks, CurrentUserService currentUser, Clock clock) {
+    public TaskService(
+            TaskRepository tasks,
+            CurrentUserService currentUser,
+            JournalRecorder journal,
+            Clock clock) {
         this.tasks = tasks;
         this.currentUser = currentUser;
+        this.journal = journal;
         this.clock = clock;
     }
 
@@ -45,14 +55,19 @@ public class TaskService {
         }
 
         LocalDate dueDate = request.dueDate() == null ? today(user) : request.dueDate();
-        Task task = new Task(
+        Task task = tasks.save(new Task(
                 user,
                 title,
                 request.estimateMin(),
                 request.estimateMax(),
                 request.priority(),
-                dueDate);
-        return TaskResponse.from(tasks.save(task));
+                dueDate));
+        journal.record(
+                "task.create",
+                Map.of("taskId", task.getId()),
+                new TaskCreateInverse(task.getId()),
+                "Tâche ajoutée : « " + task.getTitle() + " ».");
+        return TaskResponse.from(task);
     }
 
     @Transactional
@@ -61,38 +76,41 @@ public class TaskService {
         if (task.getStatus() != TaskStatus.TODO) {
             throw new TaskStateException("Cette tâche a déjà changé d'état.");
         }
+        TaskStateInverse inverse = new TaskStateInverse(task.getId(), task.getStatus(), task.getDueDate());
         task.start();
+        journal.record(
+                "task.start",
+                Map.of("taskId", task.getId()),
+                inverse,
+                "Tâche démarrée : « " + task.getTitle() + " ».");
         return TaskResponse.from(task);
     }
 
     @Transactional
     public void done(long id) {
         Task task = requireTask(id);
-        if (task.getStatus() != TaskStatus.DONE) {
-            task.done();
+        if (task.getStatus() == TaskStatus.DONE) {
+            return;
         }
+        TaskStateInverse inverse = new TaskStateInverse(task.getId(), task.getStatus(), task.getDueDate());
+        task.done();
+        journal.record(
+                "task.done",
+                Map.of("taskId", task.getId()),
+                inverse,
+                "Tâche terminée : « " + task.getTitle() + " ».");
     }
 
     @Transactional
     public void deferToTomorrow(long id) {
         Task task = requireTask(id);
+        TaskStateInverse inverse = new TaskStateInverse(task.getId(), task.getStatus(), task.getDueDate());
         task.deferTo(today(task.getUser()).plusDays(1));
-    }
-
-    @Transactional
-    public int deferNonCritical(LocalDate today) {
-        AppUser user = currentUser.requireCurrentUser();
-        List<Task> dueToday = tasks.findByUserIdAndStatusAndDueDateLessThanEqual(
-                user.getId(), TaskStatus.TODO, today);
-
-        int deferred = 0;
-        for (Task task : dueToday) {
-            if (task.getPriority() != TaskPriority.CRITICAL) {
-                task.deferTo(today.plusDays(1));
-                deferred++;
-            }
-        }
-        return deferred;
+        journal.record(
+                "task.defer",
+                Map.of("taskId", task.getId()),
+                inverse,
+                "Tâche reportée : « " + task.getTitle() + " ».");
     }
 
     private Task requireTask(long id) {

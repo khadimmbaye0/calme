@@ -11,6 +11,7 @@ import {
   type EventKind,
 } from '../api/events'
 import NowPanel from './NowPanel'
+import JournalPanel from './JournalPanel'
 import ProjectsPanel from './ProjectsPanel'
 import {
   addDays,
@@ -38,7 +39,7 @@ const KIND_STYLES: Record<EventKind, string> = {
 }
 
 type LoadStatus = 'loading' | 'ready' | 'error'
-type View = 'now' | 'calendar' | 'projects'
+type View = 'now' | 'calendar' | 'projects' | 'journal'
 
 interface CalendarScreenProps {
   user: AuthUser
@@ -273,6 +274,19 @@ export default function CalendarScreen({
             >
               Projets
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'journal'}
+              onClick={() => setView('journal')}
+              className={`rounded-full px-4 py-1.5 text-sm transition ${
+                view === 'journal'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Journal
+            </button>
           </div>
 
           <div
@@ -504,6 +518,10 @@ export default function CalendarScreen({
 
           <div className={view === 'projects' ? 'block lg:col-span-2' : 'hidden'}>
             {view === 'projects' && <ProjectsPanel onUnauthorized={onUnauthorized} />}
+          </div>
+
+          <div className={view === 'journal' ? 'block lg:col-span-2' : 'hidden'}>
+            {view === 'journal' && <JournalPanel onUnauthorized={onUnauthorized} />}
           </div>
         </div>
       </div>

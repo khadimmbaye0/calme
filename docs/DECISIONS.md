@@ -33,7 +33,7 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - L'API calendrier est protégée par la session locale (voir Authentification locale).
 - Les instants sont stockés en UTC (`timestamptz`) et échangés en ISO-8601 ; l'affichage utilise le fuseau du navigateur.
 - Les événements `FIXED` et `PLANNED` ne peuvent pas se chevaucher : le backend répond `409` avec un Problem Detail, sans écriture. Les `AVAILABILITY` peuvent se chevaucher.
-- Le CRUD manuel est en place ; la partie agent de F2, le journal/undo et les récurrences restent à faire.
+- Le CRUD manuel est en place ; la partie agent de F2 et les récurrences restent à faire.
 
 ## Planner et écran Maintenant (12 nov. 2026, délégués)
 
@@ -51,6 +51,14 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - La planification utilise 60 % du temps libre, place chaque étape après ses dépendances et hors événements `FIXED`/`PLANNED`, et crée un événement `PLANNED` par étape.
 - Si les créneaux sont insuffisants, le backend répond `409` avec une explication et n'écrit rien ; il invite à réduire le périmètre ou à allonger l'échéance.
 - La progression est calculée à partir des étapes terminées ; l'édition et la replanification avancée des projets restent à faire.
+
+## Journal et annulation (F8, 12 nov. 2026, délégués)
+
+- Le journal enregistre les mutations d'événements, de tâches, d'énergie et de projets, avec une explication d'une phrase.
+- Les 30 actions les plus récentes sont listées. Seule la dernière action `APPLIED` peut être annulée ; elle passe ensuite en `UNDONE`.
+- L'annulation restaure l'état antérieur via un inverse JSON : suppression/recréation d'événement, restauration de champs, état de tâche, suppression en cascade d'un projet planifié, ou restauration des tâches reportées et du niveau d'énergie précédent.
+- Une suppression d'événement annulée restaure le même identifiant. L'annulation n'ajoute pas une nouvelle action au journal.
+- Le journal est prêt à recevoir les actions de l'agent LLM, sans lui donner d'écriture directe en base.
 
 ## Non décidé
 

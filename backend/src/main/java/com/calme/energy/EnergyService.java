@@ -3,8 +3,17 @@ package com.calme.energy;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import com.calme.tasks.TaskService;
+import com.calme.journal.DeferredTask;
+import com.calme.journal.EnergySetInverse;
+import com.calme.journal.JournalRecorder;
+import com.calme.tasks.Task;
+import com.calme.tasks.TaskPriority;
+import com.calme.tasks.TaskRepository;
+import com.calme.tasks.TaskStatus;
 import com.calme.user.AppUser;
 import com.calme.user.CurrentUserService;
 
@@ -16,17 +25,20 @@ public class EnergyService {
 
     private final EnergyLogRepository logs;
     private final CurrentUserService currentUser;
-    private final TaskService tasks;
+    private final TaskRepository tasks;
+    private final JournalRecorder journal;
     private final Clock clock;
 
     public EnergyService(
             EnergyLogRepository logs,
             CurrentUserService currentUser,
-            TaskService tasks,
+            TaskRepository tasks,
+            JournalRecorder journal,
             Clock clock) {
         this.logs = logs;
         this.currentUser = currentUser;
         this.tasks = tasks;
+        this.journal = journal;
         this.clock = clock;
     }
 
@@ -44,10 +56,37 @@ public class EnergyService {
     public EnergyResponse setToday(EnergyLevel level) {
         AppUser user = currentUser.requireCurrentUser();
         LocalDate today = today(user);
-        logs.save(new EnergyLog(user, today, level, EnergySource.TAP));
+        EnergyLevel previousLevel = logs.findFirstByUserIdAndEnergyDateOrderByIdDesc(user.getId(), today)
+                .map(EnergyLog::getLevel)
+                .orElse(EnergyLevel.GOOD);
 
-        int deferred = level == EnergyLevel.LOW ? tasks.deferNonCritical(today) : 0;
-        return new EnergyResponse(today, level, deferred);
+        List<DeferredTask> deferredTasks = new ArrayList<>();
+        if (level == EnergyLevel.LOW) {
+            List<Task> dueToday = tasks.findByUserIdAndStatusAndDueDateLessThanEqual(
+                    user.getId(), TaskStatus.TODO, today);
+            for (Task task : dueToday) {
+                if (task.getPriority() != TaskPriority.CRITICAL) {
+                    deferredTasks.add(new DeferredTask(task.getId(), task.getStatus(), task.getDueDate()));
+                    task.deferTo(today.plusDays(1));
+                }
+            }
+        }
+
+        logs.save(new EnergyLog(user, today, level, EnergySource.TAP));
+        journal.record(
+                "energy.set",
+                Map.of("level", level),
+                new EnergySetInverse(today, previousLevel, deferredTasks),
+                "Énergie mise à jour : " + label(level) + ".");
+        return new EnergyResponse(today, level, deferredTasks.size());
+    }
+
+    private String label(EnergyLevel level) {
+        return switch (level) {
+            case LOW -> "basse";
+            case MID -> "moyenne";
+            case GOOD -> "bonne";
+        };
     }
 
     private LocalDate today(AppUser user) {
