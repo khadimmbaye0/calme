@@ -1,74 +1,107 @@
-# Calme
+<div align="center">
+  <img src="docs/screenshots/banner.png" alt="Calme — une journée à la fois" width="100%">
+</div>
 
-Calme est une application personnelle d'organisation pour rendre la prochaine action claire, réaliste et sans culpabilisation. La spécification produit complète est dans [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md).
+<div align="center">
+  <a href="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml"><img alt="Fixtures" src="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml/badge.svg?branch=main"></a>
+  <img alt="Java 21" src="https://img.shields.io/badge/Java-21-C4704B?style=flat-square&amp;labelColor=2B2620&amp;logo=openjdk&amp;logoColor=FAF6EE">
+  <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring%20Boot-3.5-C4704B?style=flat-square&amp;labelColor=2B2620&amp;logo=springboot&amp;logoColor=FAF6EE">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-8AA07C?style=flat-square&amp;labelColor=2B2620&amp;logo=react&amp;logoColor=FAF6EE">
+  <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-8AA07C?style=flat-square&amp;labelColor=2B2620&amp;logo=postgresql&amp;logoColor=FAF6EE">
+  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2B2620?style=flat-square&amp;labelColor=C4704B&amp;logo=docker&amp;logoColor=FAF6EE">
+  <img alt="Agent DeepSeek" src="https://img.shields.io/badge/Agent-DeepSeek-C4704B?style=flat-square&amp;labelColor=2B2620">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-57%20backend%20%C2%B7%2028%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
+</div>
 
-> **État du dépôt :** jalon « socle exécutable + calendrier manuel + authentification locale + écran Maintenant + projets + journal + agent ». Le backend, le frontend, PostgreSQL, Docker Compose, les migrations Flyway, le CRUD calendrier, la session mono-utilisateur, le planner de base, le planner de projets (F5), le journal/undo (F8) et l'agent conversationnel (F4) sont en place. Le digest, l'évaluation des variantes de commandes et la replanification/édition avancée des projets restent à faire.
+<br>
 
-## Ce qui fonctionne
+**Calme** est une application personnelle d'organisation qui transforme une phrase en une journée réaliste.
 
-- Backend Spring Boot 3.5 / Java 21 avec un endpoint de santé `GET /api/health`.
-- Authentification locale par session, mot de passe BCrypt, un seul compte.
-- CRUD calendrier `GET/POST/PUT/DELETE /api/events` protégé par la session, avec validation des conflits et réponses `application/problem+json`.
-- Vue jour React 19 / Vite / TypeScript : navigation par jour, barre « maintenant » actualisée chaque minute, création, modification et suppression d'événements.
-- Écran « Maintenant » : une seule action, énergie déclarée en un tap, boutons « Je commence », « Plus tard » et « Trop lourd ce soir ».
-- Planner de base : capacité 60/40/30 % selon l'énergie, tâches de 25 min maximum, titres de 80 caractères maximum, créneaux libres hors événements fixes, report des tâches non critiques en énergie basse.
-- Ajout manuel de tâches et seed des 14 blocs d'alternance ; le bloc courant est affiché.
-- Projets (F5) : objectif et échéance, étapes avec durées, dépendances validées en DAG, buffer de 20 % minimum, planification dans les créneaux libres et suivi de progression.
-- Interface Projets : liste, détail, création d'étapes avec dépendances et marquage terminé.
-- Journal (F8) : 30 dernières actions, explication courte, annulation de la plus récente, restauration des événements/tâches/projets/énergie.
-- Agent (F4) : chat en langage naturel, outils calendrier/tâches/projets/énergie/journal, confirmations pour les suppressions et les plans volumineux, journal/undo.
-- Interface minimaliste et responsive de 320 px au desktop : papier chaud, titres Fraunces, cartes filaires, chat et formulaires sans débordement, timeline mobile défilante, aucune animation décorative.
-- Déploiement en une commande : `./scripts/up.sh` ou `make up`, avec healthchecks, génération des secrets locaux et port frontend unique.
-- PostgreSQL 16, migrations Flyway `V1` à `V4`.
-- Docker Compose pour lancer la base, le backend et le frontend.
-- Tests backend avec Testcontainers et tests frontend avec Vitest.
+Un agent central, un calendrier qui protège les engagements, un écran « Maintenant » qui n'affiche qu'une action, et un journal qui rend chaque décision annulable.
 
-## Prérequis
-
-- Java 21 et Maven 3.9+
-- Node.js 22.12+ et npm
-- Docker et Docker Compose
-- Python 3 (script de démarrage et validation des fixtures)
+> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek et interface responsive. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
 
 ## Aperçu
 
-<img src="docs/screenshots/connexion.png" alt="Écran de connexion Calme" width="720">
+<img src="docs/screenshots/agent.png" alt="L'agent conversationnel de Calme" width="100%">
 
-<img src="docs/screenshots/agent.png" alt="Agent conversationnel Calme" width="720">
+<p align="center"><sub>L'agent propose, le serveur valide, le journal garde une trace inversible.</sub></p>
 
-<img src="docs/screenshots/accueil-desktop.png" alt="Écran calendrier Calme" width="720">
+### Calendrier, projets, journal et mobile
 
-## Démarrage en une commande
+| Calendrier | Projets |
+|:---:|:---:|
+| <img src="docs/screenshots/calendar.png" alt="Vue jour du calendrier Calme" width="100%"> | <img src="docs/screenshots/projects.png" alt="Détail d'un projet planifié" width="100%"> |
+| **Journal** | **Mobile** |
+| <img src="docs/screenshots/journal.png" alt="Journal des actions annulables" width="100%"> | <img src="docs/screenshots/mobile.png" alt="Calme sur mobile" width="250"> |
+
+<p align="center"><sub>Captures réalisées avec un jeu de données de démonstration.</sub></p>
+
+## Ce que fait Calme
+
+### Agent central
+Parle naturellement : « ajoute un cours demain de 9h à 10h », « qu'est-ce que je fais maintenant ? », « planifie mon mémoire ». L'agent appelle des outils, le backend vérifie, puis l'action est journalisée.
+
+### Calendrier
+Vue jour, événements fixes, planifiés et disponibilités. Les conflits sont signalés avant écriture ; les événements fixes ne sont jamais déplacés silencieusement.
+
+### Maintenant
+Une seule action, avec une durée maximale de 25 minutes et un titre de 80 caractères. L'énergie se déclare en un geste ; en énergie basse, les tâches non critiques sont reportées.
+
+### Projets
+Objectif, échéance, étapes, dépendances validées en DAG, buffer de 20 % minimum et planification dans les créneaux libres. La progression se met à jour à chaque étape terminée.
+
+### Journal et contrôle
+Les 30 dernières actions sont visibles, expliquées en une phrase et annulables. Une suppression d'événement ou un plan de plus de 10 éléments demande une confirmation.
+
+### Interface
+Papier chaud, titres Fraunces, cartes filaires et aucune animation décorative. Le chat, les formulaires et les listes restent utilisables de 320 px au desktop.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  UI["React 19 · Vite"] -->|"session"| API["Spring Boot 3.5"]
+  API --> SERVICES["Planner & services métier"]
+  SERVICES --> DB[("PostgreSQL 16")]
+  API --> LLM["DeepSeek · tool calling"]
+  LLM -->|"outils validés"| SERVICES
+  SERVICES --> JOURNAL["Journal & undo"]
+```
+
+Le LLM ne touche jamais la base. Il propose des appels d'outils ; le backend applique les règles de conflit, de capacité, de dépendances et de confirmation, puis journalise l'action et son inverse.
+
+| Couche | Choix |
+|---|---|
+| Frontend | React 19, Vite 8, TypeScript 5.9, Tailwind CSS 4, Fraunces |
+| Backend | Spring Boot 3.5, Java 21, Spring Security, Spring Data JPA, Flyway |
+| Données | PostgreSQL 16, Testcontainers pour les tests |
+| Agent | DeepSeek tool calling, mode `simulated` sans réseau |
+| Déploiement | Docker Compose, Nginx, healthchecks |
+
+## Démarrage rapide
 
 ```bash
+git clone https://github.com/khadimmbaye0/calme.git
+cd calme
 ./scripts/up.sh
 ```
 
-ou :
+Le script crée `.env` si nécessaire, génère les secrets locaux, construit la pile, attend le healthcheck et affiche l'URL ainsi que le mot de passe Calme à la première génération.
+
+Ouvrir **<http://localhost:5173>**. Compte local : `local@calme.invalid`.
 
 ```bash
-make up
-```
-
-Le script crée `.env` si nécessaire, génère `POSTGRES_PASSWORD` et `CALME_AUTH_PASSWORD`, construit la pile, attend que l'application réponde et affiche l'URL ainsi que le mot de passe Calme à la première génération.
-
-Ouvrir <http://localhost:5173>. L'API et le healthcheck passent par le proxy Nginx (`http://localhost:5173/api/health`). Seul le port frontend est publié ; PostgreSQL et Spring restent internes.
-
-Arrêter la pile :
-
-```bash
+make up          # équivalent
 docker compose down
+docker compose down -v   # supprime aussi les données locales
 ```
 
-Supprimer aussi les données locales :
+Seul le port frontend est publié ; PostgreSQL et Spring restent sur le réseau Compose. Le port `FRONTEND_PORT` vaut `5173` par défaut.
 
-```bash
-docker compose down -v
-```
-
-### Configuration manuelle
-
-Pour gérer `.env` soi-même :
+<details>
+<summary>Configuration manuelle et développement</summary>
 
 ```bash
 cp .env.example .env
@@ -76,45 +109,15 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-Prérequis : Docker avec Docker Compose v2 et Python 3 pour le script. Le port `FRONTEND_PORT` vaut `5173` par défaut et peut être changé dans `.env`.
-
-### Développement avec PostgreSQL exposé
-
-Pour lancer le backend depuis l'hôte, publier PostgreSQL uniquement sur la boucle locale :
+Pour lancer PostgreSQL depuis l'hôte :
 
 ```bash
 docker compose -f compose.yaml -f compose.dev.yaml up -d db
+set -a && source .env && set +a
+cd backend && mvn spring-boot:run
 ```
 
-## Connexion locale
-
-- Compte fixe : `local@calme.invalid`.
-- Mot de passe : la valeur de `CALME_AUTH_PASSWORD` dans `.env`.
-- Session serveur avec cookie `HttpOnly` et `SameSite=Strict`, mot de passe haché en BCrypt, pas de 2FA.
-- Le CSRF est désactivé : c'est un choix assumé pour cette application locale non exposée, avec un cookie `SameSite=Strict`. À revoir avant toute exposition réseau.
-- L'API `/api/events` exige une session. Seuls `/api/health` et `/api/auth/login` sont publics.
-
-## Développement local
-
-### Base de données
-
-```bash
-docker compose -f compose.yaml -f compose.dev.yaml up -d db
-```
-
-### Backend
-
-```bash
-set -a
-source .env
-set +a
-cd backend
-mvn spring-boot:run
-```
-
-Le backend applique les migrations Flyway au démarrage et dérive le hash du compte local depuis `CALME_AUTH_PASSWORD`. `GET /api/health` renvoie `{"status":"UP"}` lorsque la base est joignable.
-
-### Frontend
+Frontend en développement :
 
 ```bash
 cd frontend
@@ -122,166 +125,122 @@ npm ci
 npm run dev
 ```
 
-Vite sert l'application sur <http://localhost:5173> et proxyfie `/api` vers `http://localhost:8080`.
+L'API détaillée et les exemples `curl` sont dans [`docs/API.md`](docs/API.md).
+
+</details>
+
+<details>
+<summary>Voir l'écran de connexion</summary>
+
+<img src="docs/screenshots/login.png" alt="Écran de connexion Calme" width="720">
+
+</details>
 
 ## Agent et DeepSeek
 
-L'agent est l'écran central. Il utilise le tool calling DeepSeek : le modèle propose des appels d'outils, le backend valide et exécute via les services métier, puis journalise l'action.
+L'agent est accessible par l'onglet **Agent**, sélectionné par défaut. Il utilise le tool calling DeepSeek : le modèle propose, le backend décide.
 
-```bash
-# Envoyer une phrase à l'agent
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/chat \
-  -H 'Content-Type: application/json' \
-  -d '{"message":"Ajoute un cours demain de 9h à 10h."}'
+| Domaine | Outils |
+|---|---|
+| Calendrier | `calendar_list` · `calendar_create` · `calendar_update` · `calendar_delete` |
+| Tâches | `task_list` · `task_create` · `task_start` · `task_complete` · `task_defer` |
+| Projets | `project_list` · `project_plan` |
+| Énergie / Maintenant | `energy_set` · `now_get` |
+| Journal | `journal_list` · `journal_undo` |
 
-# Historique de la conversation
-curl -b /tmp/calme-cookies.txt http://localhost:5173/api/agent/messages
-
-# Confirmer ou annuler une action proposée
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/confirm/<id>
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/cancel/<id>
+```text
+Vous  ·  Ajoute un cours demain de 9h à 10h.
+Calme ·  C'est ajouté. Je te propose de garder la matinée libre après.
 ```
 
-La clé est lue depuis `DEEPSEEK_API_KEY` dans `.env` (non versionné). `CALME_LLM_MODE=deepseek` active l'agent réel ; le mode `simulated` reste disponible et ne fait aucun appel réseau. Le modèle par défaut est `deepseek-flash`, modifiable avec `DEEPSEEK_MODEL`.
+Une suppression d'événement est toujours confirmée. Un plan de projet qui touche plus de 10 éléments aussi. Le backend ne valide l'action qu'après confirmation et la journalise avec son inverse.
 
-Les messages, la date, le bloc, l'énergie et les données nécessaires aux outils (titres, créneaux) transitent par DeepSeek. N'y mets pas de données confidentielles. La politique de données est cadrée dans [`docs/DECISIONS.md`](docs/DECISIONS.md) ; le mode simulé reste le défaut d'un déploiement sans clé.
+### Activer DeepSeek
 
-## API calendrier et authentification
-
-> Les exemples ci-dessous ciblent le backend local sur `:8080`. Avec la pile Docker, remplacer par `http://localhost:5173` : l'API passe par le proxy Nginx.
+Sans clé, l'application démarre en mode `simulated` et ne fait aucun appel réseau. Pour le mode réel, dans `.env` :
 
 ```bash
-# Charger les valeurs locales (dont CALME_AUTH_PASSWORD)
-set -a
-source .env
-set +a
-
-# Connexion : stocke le cookie de session
-curl -c /tmp/calme-cookies.txt -X POST http://localhost:8080/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d "{\"password\":\"$CALME_AUTH_PASSWORD\"}"
-
-# Session courante
-curl -b /tmp/calme-cookies.txt http://localhost:8080/api/auth/me
-
-# Événements d'une journée (bornes ISO-8601, excluantes)
-curl -b /tmp/calme-cookies.txt \
-  "http://localhost:8080/api/events?from=2026-11-12T00:00:00Z&to=2026-11-13T00:00:00Z"
-
-# Création
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/events \
-  -H 'Content-Type: application/json' \
-  -d '{"title":"Relire le plan","startAt":"2026-11-12T19:00:00Z","endAt":"2026-11-12T19:15:00Z","kind":"PLANNED"}'
-
-# Déconnexion
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/auth/logout
+DEEPSEEK_API_KEY=<votre-clé>
+CALME_LLM_MODE=deepseek
+DEEPSEEK_MODEL=deepseek-flash
 ```
 
-Un chevauchement entre événements `FIXED` ou `PLANNED` renvoie `409` avec un Problem Detail et n'écrit rien. Les `AVAILABILITY` peuvent se chevaucher. Les instants sont stockés en UTC et affichés dans le fuseau du navigateur.
+La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/AGENT_CONTRACT.md`](docs/AGENT_CONTRACT.md).
 
-### Maintenant, tâches et énergie
+## Sécurité et données
 
-```bash
-# Action proposée par le planner
-curl -b /tmp/calme-cookies.txt http://localhost:8080/api/now
+- Session locale, mot de passe BCrypt, cookie `HttpOnly` et `SameSite=Strict`.
+- CSRF désactivé pour cette application locale non exposée ; à revoir avant toute mise en ligne.
+- Pas de 2FA, pas de TLS, pas de sauvegarde automatique : ce n'est pas encore un déploiement de production.
+- Les secrets restent dans `.env` (ignoré, mode `600`) et ne sont jamais intégrés aux images.
+- En mode DeepSeek, le message, la date, le bloc, l'énergie et les données nécessaires aux outils transitent par l'API. Pas de mot de passe, secret ou donnée d'entreprise.
+- Le mode `simulated` reste disponible pour développer sans réseau.
 
-# Ajouter une tâche manuellement (durée 10 à 25 min)
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/tasks \
-  -H 'Content-Type: application/json' \
-  -d '{"title":"Relire le plan","estimateMin":15,"estimateMax":15,"priority":"NORMAL","dueDate":"2026-11-12"}'
+## Tests et qualité
 
-# Déclarer l'énergie (LOW, MID ou GOOD)
-curl -b /tmp/calme-cookies.txt -X PUT http://localhost:8080/api/energy/today \
-  -H 'Content-Type: application/json' -d '{"level":"LOW"}'
+| Suite | Commande | Résultat |
+|---|---|---|
+| Backend | `cd backend && mvn test` | **57 tests** |
+| Frontend | `cd frontend && npm test` | **28 tests** |
+| Build | `cd frontend && npm run build` | TypeScript + Vite |
+| Fixtures | `python3 scripts/validate_fixtures.py` | Contrat et fixtures valides |
 
-# Actions de l'écran Maintenant
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/now/start \
-  -H 'Content-Type: application/json' -d '{"taskId":1}'
-```
-
-Le planner ne place jamais une tâche sur un événement fixe ou déjà planifié. En énergie `LOW`, les tâches non critiques dues aujourd'hui sont reportées à demain et seules les tâches critiques restent proposées.
-
-### Projets
-
-```bash
-# Liste des projets
-curl -b /tmp/calme-cookies.txt http://localhost:8080/api/projects
-
-# Création d'un projet avec étapes et dépendances
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/projects \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "title":"Mémoire",
-    "goal":"Finir le chapitre 2",
-    "deadline":"2026-11-30",
-    "bufferRatio":0.20,
-    "steps":[
-      {"title":"Cadrage","estimateMin":30,"estimateMax":30,"priority":"NORMAL","dependsOn":[]},
-      {"title":"Rédaction","estimateMin":60,"estimateMax":60,"priority":"NORMAL","dependsOn":[0]}
-    ]
-  }'
-```
-
-Les dépendances forment un DAG validé côté backend. Chaque étape est planifiée après ses dépendances, hors événements fixes ou déjà planifiés, avec un buffer de 20 % minimum. Si les créneaux sont insuffisants, l'API répond `409` et n'écrit rien.
-
-### Journal
-
-```bash
-# Les 30 dernières actions
-curl -b /tmp/calme-cookies.txt http://localhost:8080/api/journal
-
-# Annuler la dernière action applicable
-curl -b /tmp/calme-cookies.txt -X POST http://localhost:8080/api/journal/1/undo
-```
-
-Le journal enregistre les créations/modifications/suppressions d’événements, les tâches, l’énergie et la planification de projets. Seule l’action appliquée la plus récente peut être annulée ; elle est ensuite marquée comme annulée.
-
-## Tests et vérifications
-
-```bash
-# Backend : tests d'intégration avec PostgreSQL via Testcontainers (Docker requis)
-cd backend && mvn test
-
-# Frontend : tests puis build TypeScript
-cd frontend && npm ci && npm test && npm run build
-
-# Fixtures et contrat d'agent
-python3 scripts/validate_fixtures.py
-```
-
-La CI GitHub exécute les tests backend et frontend sur chaque pull request. La suite compte 57 tests backend et 28 tests frontend.
+Les tests backend utilisent Testcontainers PostgreSQL ; les tests frontend Vitest et Testing Library. La CI vérifie chaque pull request, ainsi que GitGuardian.
 
 ## Structure
 
 ```text
-backend/                 Spring Boot 3.5, Java 21, Flyway
-  src/main/java/com/calme/auth/       session, login/logout, compte local
-  src/main/java/com/calme/calendar/   API et règles du calendrier
-  src/main/java/com/calme/tasks/      tâches manuelles
-  src/main/java/com/calme/planner/    règles pures et écran Maintenant
-  src/main/java/com/calme/energy/     énergie déclarée
-  src/main/java/com/calme/projects/   projets, dépendances et planification
-  src/main/java/com/calme/journal/    journal, inverses et annulation
-  src/main/java/com/calme/agent/      boucle LLM, outils et conversation
-  src/main/java/com/calme/blocks/     blocs d'alternance et bloc courant
-  src/main/java/com/calme/user/       utilisateur local
-  src/main/resources/db/migration/    V1 à V4
-frontend/                React 19, Vite, TypeScript, Tailwind CSS
-compose.yaml             PostgreSQL + backend + frontend
-docs/                    spécification, plan, décisions, questions, acceptation
-fixtures/                données de départ vérifiables
+backend/src/main/java/com/calme/
+  agent/       boucle LLM, outils, confirmations, messages
+  calendar/    événements, conflits, disponibilités
+  tasks/       tâches et états
+  projects/    projets, dépendances, buffer, planification
+  planner/     règles de capacité et écran Maintenant
+  journal/     actions, inverses et undo
+  energy/      énergie déclarée
+  blocks/      blocs d'alternance
+  auth/ user/  session locale et compte unique
+
+frontend/src/
+  components/  AgentPanel, CalendarScreen, NowPanel, Projects, Journal
+  api/         client typé
+  lib/         dates et helpers
+
+docs/          spec, décisions, contrat agent, API, design
+scripts/       up.sh, validate_fixtures.py
+compose.yaml
 ```
 
-## Décisions encore ouvertes
+## Roadmap
 
-L'authentification, les disponibilités par défaut et le planner de projets du MVP sont tranchés et documentés dans [`docs/DECISIONS.md`](docs/DECISIONS.md). Les autres choix restent dans [`docs/QUESTIONS.md`](docs/QUESTIONS.md) : heure et fournisseur du digest, calibration de la capacité à 60 %, hébergement, nom définitif et mémoire de l'agent.
+- [x] Socle Spring Boot, React et PostgreSQL
+- [x] Authentification locale par session
+- [x] Calendrier manuel et vue jour
+- [x] Écran Maintenant et planner énergie
+- [x] Projets, dépendances et buffer
+- [x] Journal et annulation
+- [x] Agent conversationnel DeepSeek
+- [x] Interface minimaliste et responsive
+- [x] Déploiement en une commande
+- [ ] Digest quotidien
+- [ ] Replanification et édition avancée des projets
+- [ ] Import/édition des blocs d'alternance
+- [ ] Évaluation des 20 variantes de commandes
+- [ ] Rate limiting de l'agent et sauvegardes
 
-## Travailler avec DeepSeek Harness
+## Documentation
 
-Ouvrir ce dépôt comme espace de travail dans DeepSeek Harness, puis demander à l'agent de lire `AGENTS.md`, `docs/PLAN.md` et `docs/QUESTIONS.md` avant de commencer. Les compétences spécifiques au projet sont dans `.agents/skills/`. DeepSeek Harness est encore en préversion et peut changer ; vérifier ses instructions à chaque mise à jour importante.
+| Document | Contenu |
+|---|---|
+| [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md) | Spécification produit et périmètre MVP |
+| [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) | Critères d'acceptation |
+| [`docs/AGENT_CONTRACT.md`](docs/AGENT_CONTRACT.md) | Contrat de l'agent et outils |
+| [`docs/API.md`](docs/API.md) | Exemples d'API |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Décisions prises |
+| [`docs/PLAN.md`](docs/PLAN.md) | Plan de livraison |
+| [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Questions encore ouvertes |
+| [`docs/DESIGN_TOKENS.md`](docs/DESIGN_TOKENS.md) | Palette, typographie et règles visuelles |
 
-## Versionnement
-
-`main` est la branche stable. Créer une branche courte `feat/<sujet>`, `fix/<sujet>` ou `docs/<sujet>` par changement, puis proposer une pull request vers `main`. Garder les PR petites, relisibles et accompagnées des tests pertinents. Ne jamais pousser de secrets.
-
-Les choix techniques déjà spécifiés sont React/Vite/TypeScript, Spring Boot 3/Java 21, PostgreSQL, DeepSeek API et Docker Compose. Les détails explicitement ouverts restent à décider avant leur implémentation.
+<div align="center">
+  <sub>Calme — projet personnel. Les captures utilisent des données de démonstration.</sub>
+</div>
