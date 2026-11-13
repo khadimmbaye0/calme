@@ -89,6 +89,8 @@ describe('AgentPanel', () => {
     })
 
     expect(screen.getByAltText('Aperçu de l’image jointe')).toHaveAttribute('src', 'blob:plan')
+    expect(screen.getByRole('button', { name: 'Envoyer' })).toBeDisabled()
+    fireEvent.click(screen.getByLabelText(/J’accepte que cette image/))
     fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }))
 
     expect(await screen.findByText('J’ai lu le plan. Je te propose un créneau.')).toBeInTheDocument()
@@ -102,6 +104,26 @@ describe('AgentPanel', () => {
     expect(body).toBeInstanceOf(FormData)
     expect((body as FormData).get('message')).toBe('')
     expect((body as FormData).get('image')).toBe(file)
+    expect((body as FormData).get('imageConsent')).toBe('true')
+    expect(new Headers(postCall?.[1]?.headers).get('Content-Type')).toBeNull()
+  })
+
+  it('refuse une image invalide et retire l’aperçu précédent', async () => {
+    Object.defineProperty(URL, 'createObjectURL', { value: vi.fn(() => 'blob:plan'), configurable: true })
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true })
+    vi.stubGlobal('fetch', vi.fn(async () => response([])))
+    render(<AgentPanel onUnauthorized={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByText(/chargement de la conversation/i)).not.toBeInTheDocument())
+
+    const valid = new File(['png'], 'plan.png', { type: 'image/png' })
+    fireEvent.change(screen.getByLabelText('Joindre une image'), { target: { files: [valid] } })
+    expect(screen.getByAltText('Aperçu de l’image jointe')).toBeInTheDocument()
+
+    const invalid = new File(['txt'], 'notes.txt', { type: 'text/plain' })
+    fireEvent.change(screen.getByLabelText('Joindre une image'), { target: { files: [invalid] } })
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Choisis une image JPEG')
+    expect(screen.queryByAltText('Aperçu de l’image jointe')).not.toBeInTheDocument()
   })
 
   it('demande confirmation avant une suppression', async () => {

@@ -92,7 +92,10 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - Le type réel est vérifié par signature binaire ; un fichier texte renommé en image est refusé sans écriture.
 - L'image est stockée dans `message_image` (bytea), liée au message, servie par `/api/agent/messages/{id}/image` derrière la session, et jamais exposée dans une URL publique.
 - DeepSeek `deepseek-flash` reçoit l'image en content block `image_url` avec `detail=auto`, en même temps que les outils. Le modèle ne reçoit pas d'accès base.
-- Une seule image est envoyée par tour. La dernière image de l'historique est réinjectée pour permettre une question de suivi.
+- Une seule image est envoyée par tour ; une question de suivi doit joindre à nouveau l'image.
+- L'utilisateur doit cocher explicitement le consentement d'envoi à DeepSeek avant le téléversement.
+- Toute mutation proposée depuis une image passe par une confirmation backend ; aucune écriture directe.
+- Les images sont conservées 30 jours, puis supprimées par une purge lors d'un nouvel envoi.
 - Le mode simulé répond calmement sans prétendre avoir lu l'image. Le mode réel nécessite `DEEPSEEK_API_KEY`.
 - Les images sont envoyées à DeepSeek : l'UI le rappelle et demande de ne pas y mettre de données confidentielles.
 

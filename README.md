@@ -5,7 +5,7 @@
 <div align="center">
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml"><img alt="Fixtures" src="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml/badge.svg?branch=main"></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-62%20backend%20%C2%B7%2039%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-64%20backend%20%C2%B7%2040%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
 </div>
 
 <div align="center">
@@ -56,7 +56,7 @@ Filtres par famille, recherche, zoom, déplacement et détail au clic. Le graphe
 
 <p align="center"><sub>Extrait du film : une image lue, trois rendez-vous extraits, deux créneaux proposés.</sub></p>
 
-Joins un planning, une capture d’écran ou une photo de tableau. L’agent lit les dates, heures et titres utiles, puis propose l’action d’organisation adaptée. Formats **JPEG, PNG, GIF et WebP**, **8 Mo maximum**. L’image est stockée avec la conversation et envoyée à DeepSeek pour être comprise.
+Joins un planning, une capture d’écran ou une photo de tableau. L’agent lit les dates, heures et titres utiles, puis propose l’action d’organisation adaptée. Formats **JPEG, PNG, GIF et WebP**, **8 Mo maximum**. L’image est stockée avec la conversation et envoyée à DeepSeek pour être comprise, après une confirmation explicite.
 
 ### Calendrier, projets, journal et mobile
 
@@ -99,7 +99,7 @@ Joins un planning, une capture d’écran ou une photo de tableau. L’agent lit
 
 Le modèle **propose** des appels d'outils : calendrier, tâches, projets, énergie, Maintenant et journal. Le backend applique les règles de conflit, de capacité, de dépendance et de confirmation, puis journalise l'action avec son inverse. Le LLM ne touche jamais directement la base.
 
-Une image peut remplacer un long paragraphe : joins un planning ou une capture, et l'agent la lit avant de proposer. Une seule image est envoyée par tour, et la dernière image de la conversation reste disponible pour la question suivante.
+Une image peut remplacer un long paragraphe : joins un planning ou une capture, et l'agent la lit avant de proposer. Une seule image est envoyée par tour ; joins-la à nouveau pour une question de suivi. Une mutation proposée depuis une image demande toujours une confirmation.
 
 Sans clé, l'application démarre en mode `simulated` et ne fait aucun appel réseau. Pour le mode réel :
 
@@ -205,8 +205,8 @@ L'API détaillée et les exemples `curl` sont dans [`docs/API.md`](docs/API.md).
 
 | Suite | Commande | Résultat |
 |---|---|---|
-| Backend | `cd backend && mvn test` | **62 tests** |
-| Frontend | `cd frontend && npm test` | **39 tests** |
+| Backend | `cd backend && mvn test` | **64 tests** |
+| Frontend | `cd frontend && npm test` | **40 tests** |
 | Build | `cd frontend && npm run build` | TypeScript + Vite |
 | Fixtures | `python3 scripts/validate_fixtures.py` | Contrat et fixtures valides |
 

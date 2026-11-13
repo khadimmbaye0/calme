@@ -274,7 +274,8 @@ class AgentApiTests {
 
         mockMvc.perform(multipart("/api/agent/chat")
                         .file(image)
-                        .param("message", "Ajoute ce cours."))
+                        .param("message", "Ajoute ce cours.")
+                        .param("imageConsent", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("J'ai lu l'image. Je te propose un créneau."));
 
@@ -283,7 +284,8 @@ class AgentApiTests {
                 .reduce((left, right) -> right)
                 .orElseThrow();
         assertThat(userMessage.content()).isEqualTo("Ajoute ce cours.");
-        assertThat(userMessage.imageDataUrl()).startsWith("data:image/png;base64,");
+        assertThat(userMessage.imageDataUrl()).isEqualTo(
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(png));
 
         String messagesResponse = mockMvc.perform(get("/api/agent/messages"))
                 .andExpect(status().isOk())
@@ -313,7 +315,8 @@ class AgentApiTests {
 
         mockMvc.perform(multipart("/api/agent/chat")
                         .file(image)
-                        .param("message", ""))
+                        .param("message", "")
+                        .param("imageConsent", "true"))
                 .andExpect(status().isOk());
 
         String response = mockMvc.perform(get("/api/agent/messages"))
@@ -339,6 +342,56 @@ class AgentApiTests {
                         "Format d'image non pris en charge. Utilise JPEG, PNG, GIF ou WebP."));
 
         assertThat(jdbcTemplate.queryForObject("select count(*) from message", Integer.class)).isZero();
+    }
+
+    @Test
+    void refusesAnImageWithoutExplicitConsent() throws Exception {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "plan.png",
+                "image/png",
+                Base64.getDecoder().decode(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+
+        mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "Lis cette image."))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Confirme l'envoi de l'image à DeepSeek."));
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from message", Integer.class)).isZero();
+    }
+
+    @Test
+    void requiresConfirmationBeforeMutatingFromAnImage() throws Exception {
+        fakeLlm.enqueue(
+                new LlmResponse("", List.of(new LlmToolCall(
+                        "call_create",
+                        "calendar_create",
+                        objectMapper.writeValueAsString(Map.of(
+                                "title", "Cours lu sur l'image",
+                                "start_at", "2027-01-10T09:00:00Z",
+                                "end_at", "2027-01-10T10:00:00Z",
+                                "kind", "FIXED"))))));
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "plan.png",
+                "image/png",
+                Base64.getDecoder().decode(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+
+        JsonNode response = objectMapper.readTree(mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "Ajoute ce cours.")
+                        .param("imageConsent", "true"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+
+        assertThat(response.get("pendingConfirmation").isObject()).isTrue();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from event", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from agent_action", Integer.class)).isZero();
     }
 
     private JsonNode chat(String message) throws Exception {

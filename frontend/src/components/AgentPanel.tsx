@@ -44,6 +44,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
+  const [imageConsent, setImageConsent] = useState(false)
   const transcriptRef = useRef<HTMLDivElement | null>(null)
   const objectUrls = useRef<string[]>([])
 
@@ -94,33 +95,45 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
     ])
   }
 
-  const handleImage = (file: File | null) => {
-    setImageError(null)
-    if (!file) {
-      return
-    }
-    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-      setImageError('Choisis une image JPEG, PNG, GIF ou WebP.')
-      return
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setImageError('L’image doit faire 8 Mo maximum.')
-      return
-    }
-
-    const preview = URL.createObjectURL(file)
-    objectUrls.current.push(preview)
-    setImage(file)
-    setImagePreview(preview)
-  }
-
-  const removeImage = () => {
+  const clearAttachment = () => {
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview)
       objectUrls.current = objectUrls.current.filter((url) => url !== imagePreview)
     }
     setImage(null)
     setImagePreview(null)
+    setImageConsent(false)
+  }
+
+  const handleImage = (file: File | null) => {
+    setImageError(null)
+    if (!file) {
+      return
+    }
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+      clearAttachment()
+      setImageError('Choisis une image JPEG, PNG, GIF ou WebP.')
+      return
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      clearAttachment()
+      setImageError('L’image doit faire 8 Mo maximum.')
+      return
+    }
+
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+      objectUrls.current = objectUrls.current.filter((url) => url !== imagePreview)
+    }
+    const preview = URL.createObjectURL(file)
+    objectUrls.current.push(preview)
+    setImage(file)
+    setImagePreview(preview)
+    setImageConsent(false)
+  }
+
+  const removeImage = () => {
+    clearAttachment()
     setImageError(null)
   }
 
@@ -133,6 +146,8 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
 
     const attachedImage = image
     const attachedPreview = imagePreview
+    const attachedConsent = imageConsent
+    const optimisticId = -Date.now() - 1
     setSending(true)
     setError(null)
     setNotice(null)
@@ -141,10 +156,11 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
     setInput('')
     setImage(null)
     setImagePreview(null)
+    setImageConsent(false)
     setMessages((current) => [
       ...current,
       {
-        id: -Date.now() - 1,
+        id: optimisticId,
         role: 'USER',
         content: message || 'Image jointe.',
         createdAt: new Date().toISOString(),
@@ -154,7 +170,7 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
     ])
 
     try {
-      const response = await sendAgentMessage(message, attachedImage)
+      const response = await sendAgentMessage(message, attachedImage, attachedConsent)
       appendAgent(response.message)
       setPending(response.pendingConfirmation)
       setActions(response.actions)
@@ -166,6 +182,13 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
       if (failure instanceof UnauthorizedError) {
         onUnauthorized()
         return
+      }
+      setMessages((current) => current.filter((entry) => entry.id !== optimisticId))
+      setInput(message)
+      if (attachedImage) {
+        setImage(attachedImage)
+        setImagePreview(attachedPreview)
+        setImageConsent(attachedConsent)
       }
       setError(errorMessage(failure))
     } finally {
@@ -387,6 +410,15 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
             >
               Retirer
             </button>
+            <label className="mt-1 flex items-start gap-2 text-[10px] leading-relaxed text-ink/45">
+              <input
+                type="checkbox"
+                checked={imageConsent}
+                onChange={(event) => setImageConsent(event.target.checked)}
+                className="mt-0.5"
+              />
+              J’accepte que cette image soit envoyée à DeepSeek pour être lue.
+            </label>
           </div>
         )}
         <label htmlFor="agent-message" className="sr-only">
@@ -422,7 +454,13 @@ export default function AgentPanel({ onUnauthorized }: AgentPanelProps) {
           </p>
           <button
             type="submit"
-            disabled={sending || loading || (!input.trim() && !image) || pending !== null}
+            disabled={
+              sending ||
+              loading ||
+              (!input.trim() && !image) ||
+              (Boolean(image) && !imageConsent) ||
+              pending !== null
+            }
             className="ml-auto rounded-xl bg-terracotta px-4 py-2 text-sm font-medium text-cream hover:bg-terracotta/90 disabled:opacity-40"
           >
             {sending ? 'Envoi…' : 'Envoyer'}

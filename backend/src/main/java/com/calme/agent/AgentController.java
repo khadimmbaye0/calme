@@ -37,8 +37,13 @@ public class AgentController {
     @PostMapping(value = "/chat", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AgentChatResponse chatWithImage(
             @RequestParam("message") String message,
+            @RequestParam(value = "imageConsent", defaultValue = "false") boolean imageConsent,
             @RequestPart(value = "image", required = false) MultipartFile image) {
-        return agent.chat(message, AgentImageInput.from(image));
+        AgentImageInput input = AgentImageInput.from(image);
+        if (input != null && !imageConsent) {
+            throw new IllegalArgumentException("Confirme l'envoi de l'image à DeepSeek.");
+        }
+        return agent.chat(message, input);
     }
 
     @GetMapping("/messages/{id}/image")

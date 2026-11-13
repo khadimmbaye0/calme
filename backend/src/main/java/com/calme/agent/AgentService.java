@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,10 +41,15 @@ public class AgentService {
     private static final int MAX_TOOL_CALLS = 14;
     private static final int HISTORY_MESSAGES = 20;
     private static final Duration CONFIRMATION_TTL = Duration.ofMinutes(10);
+    private static final Set<String> WRITE_TOOLS = Set.of(
+            "calendar_create", "calendar_update", "calendar_delete",
+            "task_create", "task_start", "task_complete", "task_defer",
+            "project_plan", "energy_set");
 
     private final CurrentUserService currentUser;
     private final AgentMessageRepository messages;
     private final AgentMessageImageRepository images;
+    private final AgentMessageStore messageStore;
     private final LlmClient llm;
     private final AgentToolRegistry tools;
     private final AgentToolExecutor executor;
@@ -59,6 +64,7 @@ public class AgentService {
             CurrentUserService currentUser,
             AgentMessageRepository messages,
             AgentMessageImageRepository images,
+            AgentMessageStore messageStore,
             LlmClient llm,
             AgentToolRegistry tools,
             AgentToolExecutor executor,
@@ -70,6 +76,7 @@ public class AgentService {
         this.currentUser = currentUser;
         this.messages = messages;
         this.images = images;
+        this.messageStore = messageStore;
         this.llm = llm;
         this.tools = tools;
         this.executor = executor;
@@ -88,9 +95,7 @@ public class AgentService {
         Set<Long> ids = recent.stream().map(AgentMessage::getId).collect(java.util.stream.Collectors.toSet());
         Set<Long> withImage = ids.isEmpty()
                 ? Set.of()
-                : images.findByMessageIds(ids).stream()
-                        .map(image -> image.getMessage().getId())
-                        .collect(java.util.stream.Collectors.toSet());
+                : new LinkedHashSet<>(images.findMessageIds(ids));
         return recent.stream()
                 .map(message -> AgentMessageView.from(message, withImage.contains(message.getId())))
                 .toList();
@@ -110,7 +115,7 @@ public class AgentService {
         return chat(rawMessage, null);
     }
 
-    public AgentChatResponse chat(String rawMessage, AgentImageInput image) {
+    public synchronized AgentChatResponse chat(String rawMessage, AgentImageInput image) {
         AppUser user = currentUser.requireCurrentUser();
         String message = rawMessage == null ? "" : rawMessage.trim();
         if (message.isBlank() && image == null) {
@@ -130,37 +135,17 @@ public class AgentService {
             history = history.subList(history.size() - HISTORY_MESSAGES, history.size());
         }
 
-        Set<Long> historyIds = history.stream().map(AgentMessage::getId).collect(java.util.stream.Collectors.toSet());
-        Map<Long, AgentMessageImage> imageByMessage = new LinkedHashMap<>();
-        if (!historyIds.isEmpty()) {
-            for (AgentMessageImage stored : images.findByMessageIds(historyIds)) {
-                imageByMessage.put(stored.getMessage().getId(), stored);
-            }
-        }
-        AgentMessage lastImageMessage = history.stream()
-                .filter(previous -> previous.getRole() == AgentMessageRole.USER)
-                .filter(previous -> imageByMessage.containsKey(previous.getId()))
-                .reduce((left, right) -> right)
-                .orElse(null);
-
         List<LlmMessage> conversation = new ArrayList<>();
         conversation.add(LlmMessage.system(systemPrompt(user)));
         for (AgentMessage previous : history) {
             if (previous.getRole() == AgentMessageRole.USER) {
-                AgentMessageImage previousImage = imageByMessage.get(previous.getId());
-                String imageDataUrl = image == null && previous == lastImageMessage && previousImage != null
-                        ? dataUrl(previousImage)
-                        : null;
-                conversation.add(LlmMessage.user(previous.getContent(), imageDataUrl));
+                conversation.add(LlmMessage.user(previous.getContent()));
             } else {
                 conversation.add(LlmMessage.assistant(previous.getContent(), List.of()));
             }
         }
         conversation.add(LlmMessage.user(message, image == null ? null : image.dataUrl()));
-        AgentMessage saved = messages.save(new AgentMessage(user, AgentMessageRole.USER, message));
-        if (image != null) {
-            images.save(new AgentMessageImage(saved, image.mediaType(), image.bytes()));
-        }
+        messageStore.saveUserMessage(new AgentMessage(user, AgentMessageRole.USER, message), image);
 
         List<AgentActionView> actions = new ArrayList<>();
         boolean mutated = false;
@@ -191,6 +176,25 @@ public class AgentService {
                     } catch (RuntimeException exception) {
                         conversation.add(LlmMessage.tool(call.id(), toolError("Les arguments de l'outil sont invalides.")));
                         continue;
+                    }
+
+                    if (image != null && WRITE_TOOLS.contains(call.name())) {
+                        String id = UUID.randomUUID().toString();
+                        String summary = "Action proposée depuis l'image. Vérifie-la puis confirme pour l'appliquer.";
+                        pendingActions.put(id, new PendingAction(
+                                id,
+                                user.getId(),
+                                call.name(),
+                                args,
+                                summary,
+                                Instant.now()));
+                        messages.save(new AgentMessage(user, AgentMessageRole.AGENT, summary));
+                        return new AgentChatResponse(
+                                summary,
+                                actions,
+                                new AgentPendingConfirmation(id, call.name(), summary),
+                                mutated ? latestUndoableId() : null,
+                                false);
                     }
 
                     ToolExecution execution;
@@ -321,11 +325,6 @@ public class AgentService {
         } catch (RuntimeException exception) {
             return null;
         }
-    }
-
-    private String dataUrl(AgentMessageImage image) {
-        return "data:" + image.getMediaType() + ";base64,"
-                + java.util.Base64.getEncoder().encodeToString(image.getData());
     }
 
     private String systemPrompt(AppUser user) {

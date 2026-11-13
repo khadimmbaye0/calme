@@ -38,11 +38,16 @@ export async function fetchAgentMessages(): Promise<AgentMessage[]> {
   }))
 }
 
-export function sendAgentMessage(message: string, image?: File | null): Promise<AgentChatResponse> {
+export function sendAgentMessage(
+  message: string,
+  image?: File | null,
+  imageConsent = false,
+): Promise<AgentChatResponse> {
   if (image) {
     const body = new FormData()
     body.append('message', message)
     body.append('image', image)
+    body.append('imageConsent', imageConsent ? 'true' : 'false')
     return request<AgentChatResponse>('/api/agent/chat', { method: 'POST', body })
   }
 
