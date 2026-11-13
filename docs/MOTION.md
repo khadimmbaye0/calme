@@ -2,7 +2,7 @@
 
 ## Intention
 
-Un film de **20 secondes** pour présenter Calme en mouvement. Une phrase devient un plan, le plan devient une action, puis il ne reste que le calme.
+Un film de **24 secondes** pour présenter Calme en mouvement. Une phrase devient un plan, le plan devient une action, puis il ne reste que le calme.
 
 Le film assume une énergie plus directe que l'interface : typographie cinétique, coupes franches, réactions au son, mais toujours la palette papier, Fraunces et le fil terracotta du produit.
 
@@ -10,12 +10,13 @@ Le film assume une énergie plus directe que l'interface : typographie cinétiqu
 
 | Temps | Scène | Contenu |
 |---|---|---|
-| 0–4 s | Manifeste | « Une phrase. », « Un plan. », « Une action. », « Le calme. » sur le beat |
-| 4–6,4 s | Intro | Coupe franche sur « Une journée à la fois. » |
-| 6,4–11,1 s | L'agent | Curseur, clic d'envoi, réponse, événement et coche |
-| 11,1–15 s | Le contrôle | L'écran Agent ; l'agent propose, le serveur valide, tout reste annulable |
-| 15–18,1 s | Le calme | Carte Maintenant et entrée de journal annulable |
-| 18,1–20 s | Fin | « Calme. » et la signature |
+| 0–4 s | L'image | « Une image. Mille mots. » ; planning photographié, scan et rendez-vous extraits |
+| 4–8 s | Manifeste | « Une phrase. », « Un plan. », « Une action. », « Le calme. » sur le beat |
+| 8–10,4 s | Intro | Coupe franche sur « Une journée à la fois. » |
+| 10,4–15,1 s | L'agent | Curseur, clic d'envoi, réponse, événement et coche |
+| 15,1–19 s | Le contrôle | L'écran Agent ; l'agent propose, le serveur valide, tout reste annulable |
+| 19–22,1 s | Le calme | Carte Maintenant et entrée de journal annulable |
+| 22,1–24 s | Fin | « Calme. » et la signature |
 
 ## Direction
 
@@ -27,6 +28,7 @@ Le film assume une énergie plus directe que l'interface : typographie cinétiqu
 
 ## Micro-mouvements
 
+- Une image entre, un scan la traverse et trois rendez-vous sortent du papier.
 - Quatre mots manifeste entrent sur le beat, avec une légère rotation et un overshoot.
 - Un fil terracotta traverse les scènes et se dessine progressivement.
 - Le curseur se déplace vers le bouton d'envoi, clique, puis laisse place aux points de saisie.
@@ -39,19 +41,20 @@ Le film assume une énergie plus directe que l'interface : typographie cinétiqu
 
 La bande originale est **synthétisée de zéro** (aucun sample, aucun morceau sous licence) :
 
-- 120 BPM, 20 secondes, quatre accords.
+- 120 BPM, 24 secondes, quatre accords.
+- Les quatre premières secondes accompagnent l'image : shutter, scan, ticks et validation.
 - Nappe chaude, basse, kick doux, arpège pluck et charley discret.
 - Peu d'effets, mais placés : trois whooshes, un clic d'envoi, deux pops, un chime de validation et une signature finale.
 - Le niveau est normalisé pour rester confortable sur enceintes et casque.
 
-Le script [soundtrack.py](motion/soundtrack.py) génère le WAV ; FFmpeg l'encode en AAC et le muxe avec le MP4.
+Les scripts [soundtrack.py](motion/soundtrack.py) et [soundtrack_ultra.py](motion/soundtrack_ultra.py) génèrent le WAV ; FFmpeg l'encode en AAC et le muxe avec le MP4.
 
 ## Fabrication
 
-La séquence est pilotée par une seule timeline : une page HTML de 1600 × 900 px expose `window.seek(t)`, qui positionne chaque élément à l'instant demandé. Le manifeste occupe les quatre premières secondes, puis la timeline de l'application démarre sur une coupe.
+La séquence est pilotée par une seule timeline : une page HTML de 1600 × 900 px expose `window.seek(t)`, qui positionne chaque élément à l'instant demandé. L'image ouvre les quatre premières secondes, le manifeste prend le relais, puis la timeline de l'application démarre sur une coupe.
 
-1. [calme-motion.html](motion/calme-motion.html) contient la scène, la typographie, le manifeste et la timeline.
-2. Chromium headless rend **600 images** à 30 fps (20 s).
+1. [calme-motion.html](motion/calme-motion.html) contient l'image, la typographie, le manifeste et la timeline.
+2. Chromium headless rend **720 images** à 30 fps (24 s).
 3. FFmpeg encode le MP4 H.264, muxe l'AAC, puis génère le GIF 900 × 506 à 15 fps avec 96 couleurs.
 
 ```bash
@@ -66,9 +69,11 @@ Les images de l'application utilisent le jeu de données de démonstration du RE
 ## Fichiers
 
 - [calme-motion.html](motion/calme-motion.html) — source, manifeste et timeline.
-- [soundtrack.py](motion/soundtrack.py) — synthèse de la bande sonore.
+- [soundtrack.py](motion/soundtrack.py) — synthèse de la base musicale.
+- [soundtrack_ultra.py](motion/soundtrack_ultra.py) — intro image et mixage 24 s.
 - [calme-motion.mp4](videos/calme-motion.mp4) — 1600 × 900, 30 fps, AAC, **film sonore**.
 - [calme-motion.gif](screenshots/calme-motion.gif) — aperçu muet intégré au README.
+- [image-input.png](screenshots/image-input.png) — image extraite du film pour la lecture d'un planning.
 - [fraunces.woff2](motion/fraunces.woff2) et [OFL.txt](motion/OFL.txt) — police et licence.
 
 ## Références

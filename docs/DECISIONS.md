@@ -86,6 +86,19 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - Le graphe est un onglet de l'application, pas un nouvel écran par défaut. L'agent reste l'écran central.
 - La vue est volontairement sobre : palette du produit, pas de nouvelle couleur, pas d'animation décorative, filtres par type et panneau de détail.
 
+## Images dans l'agent (13 nov. 2026, demandé par l'utilisateur)
+
+- L'agent accepte une image par message en complément du texte : JPEG, PNG, GIF ou WebP, 8 Mo maximum.
+- Le type réel est vérifié par signature binaire ; un fichier texte renommé en image est refusé sans écriture.
+- L'image est stockée dans `message_image` (bytea), liée au message, servie par `/api/agent/messages/{id}/image` derrière la session, et jamais exposée dans une URL publique.
+- DeepSeek `deepseek-flash` reçoit l'image en content block `image_url` avec `detail=auto`, en même temps que les outils. Le modèle ne reçoit pas d'accès base.
+- Une seule image est envoyée par tour ; une question de suivi doit joindre à nouveau l'image.
+- L'utilisateur doit cocher explicitement le consentement d'envoi à DeepSeek avant le téléversement.
+- Toute mutation proposée depuis une image passe par une confirmation backend ; aucune écriture directe.
+- Les images sont conservées 30 jours, puis supprimées par une purge lors d'un nouvel envoi.
+- Le mode simulé répond calmement sans prétendre avoir lu l'image. Le mode réel nécessite `DEEPSEEK_API_KEY`.
+- Les images sont envoyées à DeepSeek : l'UI le rappelle et demande de ne pas y mettre de données confidentielles.
+
 ## Non décidé
 
 Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, l'hébergement, le nom définitif, la mémoire de l'agent et l'évaluation des variantes de commandes restent à trancher.

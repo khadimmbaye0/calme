@@ -10,8 +10,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,8 +29,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AgentService {
@@ -37,9 +41,15 @@ public class AgentService {
     private static final int MAX_TOOL_CALLS = 14;
     private static final int HISTORY_MESSAGES = 20;
     private static final Duration CONFIRMATION_TTL = Duration.ofMinutes(10);
+    private static final Set<String> WRITE_TOOLS = Set.of(
+            "calendar_create", "calendar_update", "calendar_delete",
+            "task_create", "task_start", "task_complete", "task_defer",
+            "project_plan", "energy_set");
 
     private final CurrentUserService currentUser;
     private final AgentMessageRepository messages;
+    private final AgentMessageImageRepository images;
+    private final AgentMessageStore messageStore;
     private final LlmClient llm;
     private final AgentToolRegistry tools;
     private final AgentToolExecutor executor;
@@ -53,6 +63,8 @@ public class AgentService {
     public AgentService(
             CurrentUserService currentUser,
             AgentMessageRepository messages,
+            AgentMessageImageRepository images,
+            AgentMessageStore messageStore,
             LlmClient llm,
             AgentToolRegistry tools,
             AgentToolExecutor executor,
@@ -63,6 +75,8 @@ public class AgentService {
             Clock clock) {
         this.currentUser = currentUser;
         this.messages = messages;
+        this.images = images;
+        this.messageStore = messageStore;
         this.llm = llm;
         this.tools = tools;
         this.executor = executor;
@@ -78,14 +92,40 @@ public class AgentService {
         AppUser user = currentUser.requireCurrentUser();
         List<AgentMessage> recent = new ArrayList<>(messages.findTop30ByUserIdOrderByCreatedAtDescIdDesc(user.getId()));
         Collections.reverse(recent);
-        return recent.stream().map(AgentMessageView::from).toList();
+        Set<Long> ids = recent.stream().map(AgentMessage::getId).collect(java.util.stream.Collectors.toSet());
+        Set<Long> withImage = ids.isEmpty()
+                ? Set.of()
+                : new LinkedHashSet<>(images.findMessageIds(ids));
+        return recent.stream()
+                .map(message -> AgentMessageView.from(message, withImage.contains(message.getId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AgentImage image(long id) {
+        AppUser user = currentUser.requireCurrentUser();
+        AgentMessage message = messages.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable."));
+        AgentMessageImage image = images.findByMessage_Id(message.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable."));
+        return new AgentImage(image.getMediaType(), image.getData());
     }
 
     public AgentChatResponse chat(String rawMessage) {
+        return chat(rawMessage, null);
+    }
+
+    public synchronized AgentChatResponse chat(String rawMessage, AgentImageInput image) {
         AppUser user = currentUser.requireCurrentUser();
         String message = rawMessage == null ? "" : rawMessage.trim();
+        if (message.isBlank() && image == null) {
+            return response("Écris une phrase ou joins une image pour que je puisse t'aider.", List.of(), null, null, true);
+        }
+        if (message.length() > 2000) {
+            throw new IllegalArgumentException("Le message doit faire 2000 caractères maximum.");
+        }
         if (message.isBlank()) {
-            return response("Écris une phrase pour que je puisse t'aider.", List.of(), null, null, true);
+            message = "Regarde cette image.";
         }
 
         List<AgentMessage> history = new ArrayList<>(
@@ -104,8 +144,8 @@ public class AgentService {
                 conversation.add(LlmMessage.assistant(previous.getContent(), List.of()));
             }
         }
-        conversation.add(LlmMessage.user(message));
-        messages.save(new AgentMessage(user, AgentMessageRole.USER, message));
+        conversation.add(LlmMessage.user(message, image == null ? null : image.dataUrl()));
+        messageStore.saveUserMessage(new AgentMessage(user, AgentMessageRole.USER, message), image);
 
         List<AgentActionView> actions = new ArrayList<>();
         boolean mutated = false;
@@ -136,6 +176,25 @@ public class AgentService {
                     } catch (RuntimeException exception) {
                         conversation.add(LlmMessage.tool(call.id(), toolError("Les arguments de l'outil sont invalides.")));
                         continue;
+                    }
+
+                    if (image != null && WRITE_TOOLS.contains(call.name())) {
+                        String id = UUID.randomUUID().toString();
+                        String summary = "Action proposée depuis l'image. Vérifie-la puis confirme pour l'appliquer.";
+                        pendingActions.put(id, new PendingAction(
+                                id,
+                                user.getId(),
+                                call.name(),
+                                args,
+                                summary,
+                                Instant.now()));
+                        messages.save(new AgentMessage(user, AgentMessageRole.AGENT, summary));
+                        return new AgentChatResponse(
+                                summary,
+                                actions,
+                                new AgentPendingConfirmation(id, call.name(), summary),
+                                mutated ? latestUndoableId() : null,
+                                false);
                     }
 
                     ToolExecution execution;
@@ -296,6 +355,9 @@ public class AgentService {
                 - Après une action, explique-la en une phrase.
                 - Ne demande jamais de mot de passe ni de donnée sensible.
                 - Si un outil échoue, explique calmement et propose une alternative.
+                - Si une image est jointe, lis-la comme un document ou un écran : repère les dates,
+                  heures, titres et détails utiles, puis propose l'action d'organisation adaptée.
+                  Ne recopie pas toute l'image ; résume ce que tu en retiens en une phrase.
                 """.formatted(
                 today,
                 now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

@@ -38,6 +38,37 @@ h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; 
 .rule { height: 2px; width: 0; background: #C4704B; }
 .tags { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8A7F72; }
 
+/* Image scene */
+.s-img { z-index: 4; }
+.img-copy { position: absolute; left: 96px; top: 210px; width: 580px; }
+.img-copy h2 { margin: 22px 0 0; font-size: 86px; line-height: .92; letter-spacing: -.055em; }
+.img-copy .lead { margin: 28px 0 0; max-width: 470px; font-size: 22px; line-height: 1.45; }
+.img-tags { margin-top: 26px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #8A7F72; }
+.photo-frame { position: absolute; right: 96px; top: 104px; width: 570px; height: 590px; padding: 26px 30px; border: 1px solid #E7DFD2; border-radius: 20px; background: #FFFDF8; transform: rotate(2deg); }
+.photo-head { display: flex; justify-content: space-between; align-items: baseline; }
+.photo-head .kicker { font-size: 10px; }
+.photo-head .time { font-size: 10px; color: #A79B8D; letter-spacing: .1em; }
+.photo-caption { margin-top: 6px; font-family: 'Fraunces', Georgia, serif; font-size: 30px; letter-spacing: -.035em; }
+.photo-grid { margin-top: 26px; border-top: 1px solid #E7DFD2; }
+.schedule-row { display: grid; grid-template-columns: 90px 76px 1fr; align-items: baseline; gap: 10px; padding: 17px 0; border-bottom: 1px solid #E7DFD2; font-size: 13px; color: #5F564B; }
+.schedule-row b { font-size: 14px; font-weight: 600; color: #2B2620; }
+.schedule-row em { font-style: normal; color: #6F6559; }
+.schedule-row .day { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #C4704B; }
+.scan-band { position: absolute; top: 0; left: 0; right: 0; height: 58px; background: rgba(196,112,75,.08); opacity: 0; pointer-events: none; }
+.scan-line { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: #C4704B; opacity: 0; }
+.photo-chip { opacity: 0; position: absolute; left: 26px; bottom: 24px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #E7DFD2; border-radius: 999px; padding: 7px 11px; font-size: 10px; color: #6F6559; background: #FAF6EE; }
+.photo-chip i { width: 6px; height: 6px; border-radius: 50%; background: #C4704B; display: block; }
+.extracted { position: absolute; left: 660px; top: 560px; width: 280px; display: flex; flex-direction: column; gap: 8px; }
+.ex-chip { padding: 10px 12px; border: 1px solid #E7DFD2; border-radius: 10px; background: #FFFDF8; font-size: 12px; color: #4B433A; opacity: 0; }
+.ex-chip b { font-weight: 600; color: #2B2620; }
+.image-reply { position: absolute; left: 96px; top: 610px; width: 490px; padding: 18px 20px; border: 1px solid #E7DFD2; border-radius: 16px; background: #FFFDF8; opacity: 0; }
+.image-reply .rhead { display: flex; justify-content: space-between; align-items: baseline; }
+.image-reply .rhead .kicker { font-size: 9px; }
+.image-reply .rhead .time { font-size: 9px; color: #A79B8D; letter-spacing: .1em; }
+.image-reply p { margin: 10px 0 0; font-size: 15px; line-height: 1.45; color: #4B433A; }
+.image-reply .events { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.image-reply .events span { border: 1px solid #E7DFD2; border-radius: 999px; padding: 4px 8px; font-size: 9px; color: #6F6559; }
+
 /* Manifesto */
 .s0 { z-index: 4; }
 .manifesto { position: absolute; left: 96px; top: 245px; width: 1408px; }
@@ -156,11 +187,48 @@ h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; 
     <div class="scene-tag" id="sceneTag">01 / L'agent</div>
   </div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-  <div class="footer"><span>Une journée à la fois</span><span>Motion · 20 s</span></div>
+  <div class="footer"><span>Une journée à la fois</span><span>Motion · 24 s</span></div>
   <div class="cursor" id="cursor">
     <svg viewBox="0 0 16 22" aria-hidden="true"><path d="M1 1 L14 12 L8 13 L11 20 L8 21 L5 14 L1 18 Z" fill="#2B2620" stroke="#FAF6EE" stroke-width="1.2"/></svg>
     <span class="cursor-ring" id="cursorRing"></span>
   </div>
+
+  <section class="scene s-img" id="s-img">
+    <div class="img-copy">
+      <div class="kicker">01 / L'image</div>
+      <h2 class="mask"><span id="imgLine1">Une image.</span><span id="imgLine2">Mille mots.</span></h2>
+      <p class="lead">Un planning photographié. Calme le lit, puis propose.</p>
+      <div class="img-tags">JPEG · PNG · GIF · WEBP · 8 Mo</div>
+    </div>
+
+    <div class="photo-frame" id="photoFrame">
+      <div class="photo-head">
+        <span class="kicker">Image jointe</span>
+        <span class="time">planning.png</span>
+      </div>
+      <div class="photo-caption">Ma semaine.</div>
+      <div class="photo-grid">
+        <div class="schedule-row" id="schedule1"><span class="day">Lundi</span><b>09:00</b><em>Cours</em></div>
+        <div class="schedule-row" id="schedule2"><span class="day">Mardi</span><b>14:00</b><em>Réunion</em></div>
+        <div class="schedule-row" id="schedule3"><span class="day">Jeudi</span><b>18:00</b><em>Sport</em></div>
+      </div>
+      <div class="photo-chip" id="photoChip"><i></i>image lue par Calme</div>
+      <div class="scan-band" id="scanBand"></div>
+      <div class="scan-line" id="scanLine"></div>
+    </div>
+
+    <div class="extracted">
+      <div class="ex-chip" id="ex1"><b>Lundi · 9h</b> — Cours</div>
+      <div class="ex-chip" id="ex2"><b>Mardi · 14h</b> — Réunion</div>
+      <div class="ex-chip" id="ex3"><b>Jeudi · 18h</b> — Sport</div>
+    </div>
+
+    <div class="image-reply" id="imageReply">
+      <div class="rhead"><span class="kicker">Calme</span><span class="time">maintenant</span></div>
+      <p>J'ai lu ton planning. Je te propose deux créneaux, sans toucher au sport.</p>
+      <div class="events"><span>Lundi · 9h — Cours</span><span>Mardi · 14h — Réunion</span></div>
+    </div>
+  </section>
 
   <section class="scene s0" id="s0">
     <div class="manifesto">
@@ -402,7 +470,7 @@ window.seekBase = (t) => {
 
 // Affiche la première image avant le rendu.
 window.seekBase(0);
-window.seek = (t) => {
+window.seek20 = (t) => {
   t = clamp(t, 0, 20);
   const intro = t < 4;
   $('s0').style.opacity = intro ? 1 : 0;
@@ -435,6 +503,54 @@ window.seek = (t) => {
     $('s1').style.opacity = 0;
   }
   $('s0').style.opacity = t < 4 ? 1 : 0;
+};
+window.seek20(0);
+
+window.DURATION = 24;
+window.seek = (t) => {
+  t = clamp(t, 0, 24);
+  if (t < 4) {
+    $('s-img').style.opacity = 1;
+    window.seek20(0);
+    $('s0').style.opacity = 0;
+    $('s1').style.opacity = 0;
+    $('s2').style.opacity = 0;
+    $('s3').style.opacity = 0;
+    $('s4').style.opacity = 0;
+    $('s5').style.opacity = 0;
+
+    $('imgLine1').style.transform = `translateY(${(1 - eo(p(t, 0.25, 0.75))) * 110}%)`;
+    $('imgLine2').style.transform = `translateY(${(1 - eo(p(t, 0.38, 0.88))) * 110}%)`;
+    $('photoFrame').style.opacity = eo(p(t, 0.55, 1.05));
+    $('photoFrame').style.transform = `translateX(${(1 - eo(p(t, 0.55, 1.05))) * 70}px) rotate(${2 + (1 - eo(p(t, 0.55, 1.05))) * 1.5}deg)`;
+    $('photoChip').style.opacity = eo(p(t, 2.32, 2.52));
+    $('imageReply').style.opacity = eo(p(t, 2.6, 2.95));
+    $('imageReply').style.transform = `translateY(${(1 - eo(p(t, 2.6, 2.95))) * 14}px)`;
+
+    const scanning = p(t, 1.45, 2.55);
+    $('scanBand').style.opacity = scanning > 0 && scanning < 1 ? 0.85 : 0;
+    $('scanBand').style.transform = `translateY(${120 + scanning * 390}px)`;
+    $('scanLine').style.opacity = scanning > 0 && scanning < 1 ? 0.9 : 0;
+    $('scanLine').style.transform = `translateY(${120 + scanning * 390}px)`;
+
+    [['schedule1', 1.65], ['schedule2', 1.95], ['schedule3', 2.25]].forEach(([id, at]) => {
+      $(id).style.background = `rgba(196,112,75,${0.10 * eo(p(t, at, at + 0.25))})`;
+    });
+    [['ex1', 2.05], ['ex2', 2.22], ['ex3', 2.39]].forEach(([id, at]) => {
+      const enter = eo(p(t, at, at + 0.28));
+      $(id).style.opacity = enter;
+      $(id).style.transform = `translateX(${(1 - enter) * 16}px)`;
+    });
+
+    $('progressBar').style.width = `${(t / 24) * 100}%`;
+    $('sceneTag').textContent = "01 / L'image";
+    return;
+  }
+
+  $('s-img').style.opacity = 0;
+  window.seek20(t - 4);
+  $('progressBar').style.width = `${(t / 24) * 100}%`;
+  $('sceneTag').textContent = t < 8 ? '02 / Manifeste' : t < 10.4 ? "03 / L'intro" : t < 15.1 ? "04 / L'agent" : t < 19 ? '05 / Le contrôle' : t < 22.1 ? '06 / Le calme' : 'Calme';
 };
 window.seek(0);
 

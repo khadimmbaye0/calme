@@ -49,3 +49,4 @@ Le modèle reçoit la conversation, le contexte minimal (date, bloc, énergie) e
 - Les actions réussies passent par les services existants et créent une entrée de journal avec inverse.
 - L'historique est limité aux 20 derniers messages utiles et ne contient pas les échanges d'outils bruts.
 - `docs/QUESTIONS.md` #8 est cadrée pour l'usage local : titres et créneaux nécessaires autorisés, pas de secrets ni de données d'entreprise.
+- Une image optionnelle est acceptée par tour (`multipart/form-data`) : JPEG, PNG, GIF ou WebP, 8 Mo maximum, type vérifié sur les octets. Elle est stockée avec le message et envoyée à DeepSeek dans le content block `image_url` (`detail=auto`), avec le texte. Le modèle ne reçoit pas d'accès base. Une seule image est envoyée par tour ; une relance de suivi doit joindre à nouveau l'image. Toute mutation proposée depuis une image exige une confirmation backend avant exécution.

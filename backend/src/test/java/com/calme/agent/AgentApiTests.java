@@ -2,6 +2,7 @@ package com.calme.agent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,9 +11,11 @@ import static org.hamcrest.Matchers.nullValue;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.calme.TestAuth;
 import com.calme.calendar.EventKind;
@@ -32,6 +35,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -79,6 +83,7 @@ class AgentApiTests {
     static class FakeLlmClient implements LlmClient {
 
         private final ConcurrentLinkedDeque<LlmResponse> responses = new ConcurrentLinkedDeque<>();
+        private final AtomicReference<List<LlmMessage>> lastRequest = new AtomicReference<>(List.of());
 
         void enqueue(LlmResponse... values) {
             responses.addAll(List.of(values));
@@ -90,8 +95,13 @@ class AgentApiTests {
 
         @Override
         public LlmResponse chat(List<LlmMessage> messages, List<Map<String, Object>> tools) {
+            lastRequest.set(List.copyOf(messages));
             LlmResponse response = responses.poll();
             return response == null ? new LlmResponse("Je n'ai pas d'autre action.", List.of()) : response;
+        }
+
+        List<LlmMessage> lastRequest() {
+            return lastRequest.get();
         }
     }
 
@@ -110,6 +120,7 @@ class AgentApiTests {
     @BeforeEach
     void clean() {
         fakeLlm.clear();
+        jdbcTemplate.update("delete from message_image");
         jdbcTemplate.update("delete from message");
         jdbcTemplate.update("delete from agent_action");
         jdbcTemplate.update("delete from task_dependency");
@@ -252,6 +263,135 @@ class AgentApiTests {
 
         mockMvc.perform(post("/api/agent/cancel/{id}", response.get("pendingConfirmation").get("id").asText()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void acceptsImageSendsItToTheLlmAndStoresIt() throws Exception {
+        fakeLlm.enqueue(new LlmResponse("J'ai lu l'image. Je te propose un créneau.", List.of()));
+        byte[] png = Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
+        MockMultipartFile image = new MockMultipartFile("image", "plan.png", "image/png", png);
+
+        mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "Ajoute ce cours.")
+                        .param("imageConsent", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("J'ai lu l'image. Je te propose un créneau."));
+
+        LlmMessage userMessage = fakeLlm.lastRequest().stream()
+                .filter(message -> "user".equals(message.role()))
+                .reduce((left, right) -> right)
+                .orElseThrow();
+        assertThat(userMessage.content()).isEqualTo("Ajoute ce cours.");
+        assertThat(userMessage.imageDataUrl()).isEqualTo(
+                "data:image/png;base64," + Base64.getEncoder().encodeToString(png));
+
+        String messagesResponse = mockMvc.perform(get("/api/agent/messages"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].role").value("USER"))
+                .andExpect(jsonPath("$[0].hasImage").value(true))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonNode messages = objectMapper.readTree(messagesResponse);
+        long messageId = messages.get(0).get("id").asLong();
+
+        mockMvc.perform(get("/api/agent/messages/{id}/image", messageId))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(result.getResponse().getContentType()).isEqualTo("image/png"))
+                .andExpect(result -> assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(png));
+    }
+
+    @Test
+    void acceptsAnImageWithoutText() throws Exception {
+        fakeLlm.enqueue(new LlmResponse("Je regarde l'image.", List.of()));
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "plan.png",
+                "image/png",
+                Base64.getDecoder().decode(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+
+        mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "")
+                        .param("imageConsent", "true"))
+                .andExpect(status().isOk());
+
+        String response = mockMvc.perform(get("/api/agent/messages"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonNode messages = objectMapper.readTree(response);
+        assertThat(messages.get(0).get("content").asText()).isEqualTo("Regarde cette image.");
+        assertThat(messages.get(0).get("hasImage").asBoolean()).isTrue();
+    }
+
+    @Test
+    void rejectsNonImageUploadWithoutWriting() throws Exception {
+        MockMultipartFile text = new MockMultipartFile(
+                "image", "notes.txt", "text/plain", "pas une image".getBytes());
+
+        mockMvc.perform(multipart("/api/agent/chat")
+                        .file(text)
+                        .param("message", "Lis ce fichier."))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(
+                        "Format d'image non pris en charge. Utilise JPEG, PNG, GIF ou WebP."));
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from message", Integer.class)).isZero();
+    }
+
+    @Test
+    void refusesAnImageWithoutExplicitConsent() throws Exception {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "plan.png",
+                "image/png",
+                Base64.getDecoder().decode(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+
+        mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "Lis cette image."))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Confirme l'envoi de l'image à DeepSeek."));
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from message", Integer.class)).isZero();
+    }
+
+    @Test
+    void requiresConfirmationBeforeMutatingFromAnImage() throws Exception {
+        fakeLlm.enqueue(
+                new LlmResponse("", List.of(new LlmToolCall(
+                        "call_create",
+                        "calendar_create",
+                        objectMapper.writeValueAsString(Map.of(
+                                "title", "Cours lu sur l'image",
+                                "start_at", "2027-01-10T09:00:00Z",
+                                "end_at", "2027-01-10T10:00:00Z",
+                                "kind", "FIXED"))))));
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "plan.png",
+                "image/png",
+                Base64.getDecoder().decode(
+                        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="));
+
+        JsonNode response = objectMapper.readTree(mockMvc.perform(multipart("/api/agent/chat")
+                        .file(image)
+                        .param("message", "Ajoute ce cours.")
+                        .param("imageConsent", "true"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+
+        assertThat(response.get("pendingConfirmation").isObject()).isTrue();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from event", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from agent_action", Integer.class)).isZero();
     }
 
     private JsonNode chat(String message) throws Exception {
