@@ -26,7 +26,7 @@ Un agent central, un calendrier qui protège les engagements, un écran « Maint
 
 <img src="docs/screenshots/calme-motion.gif" alt="Animation de présentation de Calme" width="100%">
 
-<p align="center"><sub>Une boucle silencieuse de 12 secondes — <a href="docs/videos/calme-motion.mp4">voir la vidéo MP4</a> · <a href="docs/MOTION.md">storyboard et fabrication</a>.</sub></p>
+<p align="center"><sub>Une boucle silencieuse de 14 secondes — <a href="docs/videos/calme-motion.mp4">voir la vidéo MP4</a> · <a href="docs/MOTION.md">storyboard et fabrication</a>.</sub></p>
 
 ## Aperçu
 

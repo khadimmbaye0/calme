@@ -72,7 +72,7 @@ h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; 
 .s3 .kicker { margin-bottom: 20px; }
 .s3 h2 { margin: 0; font-size: 62px; line-height: .96; letter-spacing: -.045em; }
 .steps { margin-top: 46px; space: 0; }
-.step { display: flex; gap: 13px; align-items: flex-start; margin-top: 20px; font-size: 16px; line-height: 1.4; color: #5F564B; opacity: 0; }
+.step { display: flex; gap: 13px; align-items: flex-start; margin-top: 20px; font-size: 17px; line-height: 1.4; color: #5F564B; opacity: 0; }
 .step .n { width: 22px; height: 22px; border: 1px solid #C4704B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #C4704B; flex: none; margin-top: 1px; }
 .browser { position: absolute; right: 96px; top: 140px; width: 1030px; border: 1px solid #E7DFD2; border-radius: 18px; background: #FFFDF8; overflow: hidden; opacity: 0; }
 .browser-bar { height: 28px; display: flex; align-items: center; gap: 5px; padding: 0 13px; border-bottom: 1px solid #E7DFD2; background: #FAF6EE; }
@@ -116,7 +116,7 @@ h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; 
     <div class="scene-tag" id="sceneTag">01 / L'agent</div>
   </div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-  <div class="footer"><span>Une journée à la fois</span><span>Motion · 12 s</span></div>
+  <div class="footer"><span>Une journée à la fois</span><span>Motion · 14 s</span></div>
 
   <section class="scene s1" id="s1">
     <div class="kicker">Application personnelle d'organisation</div>
@@ -138,7 +138,7 @@ h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; 
       <div class="chat-head"><span class="kicker">Agent</span><span class="time">maintenant</span></div>
       <h3>Parle à Calme.</h3>
       <div class="bubble" id="userBubble"></div>
-      <div class="reply" id="agentReply" style="opacity:0">C'est ajouté. Je te propose de garder la matinée libre après.</div>
+      <div class="reply" id="agentReply" style="opacity:0">C'est ajouté. Je garde la matinée libre après.</div>
       <div class="event-chip" id="eventChip" style="opacity:0">
         <span class="dot"></span>
         <div><div class="event-title">Cours · Deep Learning</div><div class="event-meta">demain · 09:00 – 10:00</div></div>
@@ -200,55 +200,70 @@ const $ = (id) => document.getElementById(id);
 
 const userText = "Ajoute un cours demain de 9h à 10h.";
 const tag = $('sceneTag');
+const grid = document.querySelector('.grid');
 
-window.DURATION = 12;
+window.DURATION = 14;
 
 window.seek = (t) => {
-  t = clamp(t, 0, 12);
+  t = clamp(t, 0, 14);
 
-  const s1 = fade(t, 0.15, 0.6, 2.15, 2.55);
+  // Dérive très lente de la grille : profondeur sans attraction.
+  grid.style.backgroundPosition = `${t * 1.4}px ${t * 0.7}px`;
+
+  // Intro — 0 à 3 s
+  const s1 = fade(t, 0.15, 0.6, 2.6, 3.0);
   $('s1').style.opacity = s1;
-  $('s1line1').style.transform = `translateY(${(1 - eo(p(t, 0.35, 1.05))) * 110}%)`;
-  $('s1line2').style.transform = `translateY(${(1 - eo(p(t, 0.5, 1.2))) * 110}%)`;
-  $('s1rule').style.width = `${eo(p(t, 1.0, 1.55)) * 86}px`;
+  const s1out = p(t, 2.6, 3.0);
+  const s1in1 = eo(p(t, 0.35, 1.05));
+  const s1in2 = eo(p(t, 0.5, 1.2));
+  $('s1line1').style.transform = `translateY(${(1 - s1in1) * 110}%) translateY(${-s1out * 14}px)`;
+  $('s1line2').style.transform = `translateY(${(1 - s1in2) * 110}%) translateY(${-s1out * 14}px)`;
+  $('s1rule').style.width = `${eo(p(t, 1.0, 1.6)) * 86}px`;
 
-  const s2 = fade(t, 2.35, 2.8, 5.45, 5.85);
+  // L'agent — 3 à 7 s
+  const s2 = fade(t, 2.9, 3.4, 6.5, 7.0);
   $('s2').style.opacity = s2;
-  $('s2line1').style.transform = `translateY(${(1 - eo(p(t, 2.55, 3.05))) * 110}%)`;
-  $('s2line2').style.transform = `translateY(${(1 - eo(p(t, 2.68, 3.18))) * 110}%)`;
-  $('chatCard').style.opacity = p(t, 2.85, 3.35);
-  $('chatCard').style.transform = `translateY(${(1 - eo(p(t, 2.85, 3.35))) * 32}px)`;
-  const typed = Math.floor(p(t, 3.15, 4.05) * userText.length);
+  $('s2line1').style.transform = `translateY(${(1 - eo(p(t, 3.05, 3.55))) * 110}%)`;
+  $('s2line2').style.transform = `translateY(${(1 - eo(p(t, 3.18, 3.68))) * 110}%)`;
+  const s2out = p(t, 6.5, 7.0);
+  $('chatCard').style.opacity = p(t, 3.35, 3.85);
+  $('chatCard').style.transform = `translateY(${(1 - eo(p(t, 3.35, 3.85))) * 32 - s2out * 12}px)`;
+  const typed = Math.floor(p(t, 3.7, 4.8) * userText.length);
   $('userBubble').textContent = userText.slice(0, typed);
-  $('agentReply').style.opacity = eo(p(t, 4.18, 4.48));
-  $('eventChip').style.opacity = eo(p(t, 4.62, 4.92));
-  $('eventChip').style.transform = `translateY(${(1 - eo(p(t, 4.62, 4.92))) * 10}px)`;
+  $('agentReply').style.opacity = eo(p(t, 4.9, 5.2));
+  $('eventChip').style.opacity = eo(p(t, 5.4, 5.7));
+  $('eventChip').style.transform = `translateY(${(1 - eo(p(t, 5.4, 5.7))) * 10}px)`;
 
-  const s3 = fade(t, 5.65, 6.1, 8.35, 8.75);
+  // Le contrôle — 7 à 10,3 s
+  const s3 = fade(t, 6.9, 7.4, 9.9, 10.3);
   $('s3').style.opacity = s3;
-  $('s3line1').style.transform = `translateY(${(1 - eo(p(t, 5.85, 6.3))) * 110}%)`;
-  $('s3line2').style.transform = `translateY(${(1 - eo(p(t, 5.98, 6.43))) * 110}%)`;
-  $('browser').style.opacity = p(t, 6.0, 6.45);
-  $('browser').style.transform = `translateX(${(1 - eo(p(t, 6.0, 6.55))) * 60}px) scale(${1.035 - eo(p(t, 6.0, 8.2)) * 0.035})`;
-  [['step1', 6.35], ['step2', 6.95], ['step3', 7.55]].forEach(([id, at]) => {
+  $('s3line1').style.transform = `translateY(${(1 - eo(p(t, 7.1, 7.55))) * 110}%)`;
+  $('s3line2').style.transform = `translateY(${(1 - eo(p(t, 7.23, 7.68))) * 110}%)`;
+  const s3out = p(t, 9.9, 10.3);
+  $('browser').style.opacity = p(t, 7.35, 7.8);
+  $('browser').style.transform = `translateX(${(1 - eo(p(t, 7.35, 7.9))) * 60 - s3out * 18}px) scale(${1.035 - eo(p(t, 7.35, 9.7)) * 0.035})`;
+  [['step1', 7.7], ['step2', 8.3], ['step3', 8.9]].forEach(([id, at]) => {
     const el = $(id);
     el.style.opacity = eo(p(t, at, at + 0.3));
     el.style.transform = `translateY(${(1 - eo(p(t, at, at + 0.3))) * 8}px)`;
   });
 
-  const s4 = fade(t, 8.75, 9.2, 10.55, 10.95);
+  // Le calme — 10,3 à 12,8 s
+  const s4 = fade(t, 10.1, 10.6, 12.4, 12.8);
   $('s4').style.opacity = s4;
-  $('s4line1').style.transform = `translateY(${(1 - eo(p(t, 8.95, 9.4))) * 110}%)`;
-  $('s4line2').style.transform = `translateY(${(1 - eo(p(t, 9.08, 9.53))) * 110}%)`;
-  $('nowCard').style.opacity = p(t, 9.15, 9.65);
-  $('nowCard').style.transform = `translateY(${(1 - eo(p(t, 9.15, 9.65))) * 34}px)`;
+  $('s4line1').style.transform = `translateY(${(1 - eo(p(t, 10.3, 10.75))) * 110}%)`;
+  $('s4line2').style.transform = `translateY(${(1 - eo(p(t, 10.43, 10.88))) * 110}%)`;
+  const s4out = p(t, 12.4, 12.8);
+  $('nowCard').style.opacity = p(t, 10.5, 11.0);
+  $('nowCard').style.transform = `translateY(${(1 - eo(p(t, 10.5, 11.0))) * 34 - s4out * 12}px)`;
 
-  const s5 = fade(t, 10.65, 11.15, 11.75, 12.0);
+  // Fin — 12,8 à 14 s
+  const s5 = fade(t, 12.6, 13.1, 13.9, 14.0);
   $('s5').style.opacity = s5;
-  $('s5rule').style.width = `${eo(p(t, 11.0, 11.35)) * 80}px`;
+  $('s5rule').style.width = `${eo(p(t, 13.2, 13.55)) * 80}px`;
 
-  $('progressBar').style.width = `${(t / 12) * 100}%`;
-  tag.textContent = t < 2.55 ? "Intro" : t < 5.85 ? "01 / L'agent" : t < 8.75 ? "02 / Le contrôle" : t < 10.9 ? "03 / Le calme" : "Calme";
+  $('progressBar').style.width = `${(t / 14) * 100}%`;
+  tag.textContent = t < 2.95 ? "Intro" : t < 6.9 ? "01 / L'agent" : t < 10.1 ? "02 / Le contrôle" : t < 12.8 ? "03 / Le calme" : "Calme";
 };
 
 // Affiche la première image avant le rendu.
