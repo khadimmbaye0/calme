@@ -22,6 +22,12 @@ Un agent central, un calendrier qui protège les engagements, un écran « Maint
 
 > **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek et interface responsive. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
 
+## En mouvement
+
+<img src="docs/screenshots/calme-motion.gif" alt="Animation de présentation de Calme" width="100%">
+
+<p align="center"><sub>Une boucle silencieuse de 12 secondes — <a href="docs/videos/calme-motion.mp4">voir la vidéo MP4</a> · <a href="docs/MOTION.md">storyboard et fabrication</a>.</sub></p>
+
 ## Aperçu
 
 <img src="docs/screenshots/agent.png" alt="L'agent conversationnel de Calme" width="100%">
