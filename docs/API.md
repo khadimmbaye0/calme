@@ -93,6 +93,15 @@ curl -b /tmp/calme-cookies.txt http://localhost:5173/api/journal
 curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/journal/1/undo
 ```
 
+## Graphe de connaissance
+
+```bash
+# Nœuds et relations de toutes les entités de l'utilisateur
+curl -b /tmp/calme-cookies.txt http://localhost:5173/api/graph
+```
+
+Lecture seule. Le graphe est calculé à la demande, avec des volumes bornés ; il n'écrit rien et n'est jamais envoyé au LLM. Les types de nœuds et d'arêtes sont documentés dans [`GRAPH.md`](GRAPH.md).
+
 ## Agent
 
 ```bash

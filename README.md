@@ -11,7 +11,7 @@
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-8AA07C?style=flat-square&amp;labelColor=2B2620&amp;logo=postgresql&amp;logoColor=FAF6EE">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2B2620?style=flat-square&amp;labelColor=C4704B&amp;logo=docker&amp;logoColor=FAF6EE">
   <img alt="Agent DeepSeek" src="https://img.shields.io/badge/Agent-DeepSeek-C4704B?style=flat-square&amp;labelColor=2B2620">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-57%20backend%20%C2%B7%2028%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-59%20backend%20%C2%B7%2038%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
 </div>
 
 <br>
@@ -20,7 +20,7 @@
 
 Un agent central, un calendrier qui protège les engagements, un écran « Maintenant » qui n'affiche qu'une action, et un journal qui rend chaque décision annulable.
 
-> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek et interface responsive. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
+> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek, graphe de connaissance et interface responsive. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
 
 ## En mouvement
 
@@ -33,6 +33,12 @@ Un agent central, un calendrier qui protège les engagements, un écran « Maint
 <img src="docs/screenshots/agent.png" alt="L'agent conversationnel de Calme" width="100%">
 
 <p align="center"><sub>L'agent propose, le serveur valide, le journal garde une trace inversible.</sub></p>
+
+### Le fil de tout
+
+<img src="docs/screenshots/graph.png" alt="Graphe de connaissance reliant projets, tâches, moments, énergie, blocs, journal et messages" width="100%">
+
+<p align="center"><sub>Un graphe en lecture seule : filtres, recherche, détail au clic, zoom et déplacement.</sub></p>
 
 ### Calendrier, projets, journal et mobile
 
@@ -60,6 +66,9 @@ Objectif, échéance, étapes, dépendances validées en DAG, buffer de 20 % min
 
 ### Journal et contrôle
 Les 30 dernières actions sont visibles, expliquées en une phrase et annulables. Une suppression d'événement ou un plan de plus de 10 éléments demande une confirmation.
+
+### Graphe de connaissance
+Une carte en lecture seule relie projets, tâches, dépendances, moments, énergie, blocs, actions et messages. Filtres par famille, recherche, panneau de détail et navigation au clic. Le graphe ne crée aucune donnée et ne part jamais vers le LLM.
 
 ### Interface
 Papier chaud, titres Fraunces, cartes filaires et aucune animation décorative. Le chat, les formulaires et les listes restent utilisables de 320 px au desktop.
@@ -186,8 +195,8 @@ La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/A
 
 | Suite | Commande | Résultat |
 |---|---|---|
-| Backend | `cd backend && mvn test` | **57 tests** |
-| Frontend | `cd frontend && npm test` | **28 tests** |
+| Backend | `cd backend && mvn test` | **59 tests** |
+| Frontend | `cd frontend && npm test` | **38 tests** |
 | Build | `cd frontend && npm run build` | TypeScript + Vite |
 | Fixtures | `python3 scripts/validate_fixtures.py` | Contrat et fixtures valides |
 
@@ -203,16 +212,17 @@ backend/src/main/java/com/calme/
   projects/    projets, dépendances, buffer, planification
   planner/     règles de capacité et écran Maintenant
   journal/     actions, inverses et undo
+  graph/       nœuds et relations en lecture seule
   energy/      énergie déclarée
   blocks/      blocs d'alternance
   auth/ user/  session locale et compte unique
 
 frontend/src/
-  components/  AgentPanel, CalendarScreen, NowPanel, Projects, Journal
-  api/         client typé
-  lib/         dates et helpers
+  components/  AgentPanel, CalendarScreen, NowPanel, Projects, Journal, KnowledgeGraphPanel
+  api/         client typé (dont graph.ts)
+  lib/         dates, helpers et layout du graphe
 
-docs/          spec, décisions, contrat agent, API, design
+docs/          spec, décisions, contrat agent, API, graphe, design
 scripts/       up.sh, validate_fixtures.py
 compose.yaml
 ```
@@ -242,6 +252,7 @@ compose.yaml
 | [`docs/ACCEPTANCE.md`](docs/ACCEPTANCE.md) | Critères d'acceptation |
 | [`docs/AGENT_CONTRACT.md`](docs/AGENT_CONTRACT.md) | Contrat de l'agent et outils |
 | [`docs/API.md`](docs/API.md) | Exemples d'API |
+| [`docs/GRAPH.md`](docs/GRAPH.md) | Graphe de connaissance, relations et limites |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Décisions prises |
 | [`docs/PLAN.md`](docs/PLAN.md) | Plan de livraison |
 | [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Questions encore ouvertes |

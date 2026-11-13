@@ -21,4 +21,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIdAndUserId(Long id, Long userId);
 
     List<Task> findByUserIdAndProjectIdOrderByIdAsc(Long userId, Long projectId);
+
+    List<Task> findTop150ByUserIdOrderByIdDesc(Long userId);
 }

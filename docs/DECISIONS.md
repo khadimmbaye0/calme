@@ -78,6 +78,14 @@ Ces choix techniques ont été faits pour avancer sans trancher les questions pr
 - La clé DeepSeek est transmise au backend via `DEEPSEEK_API_KEY`, avec `DEEPSEEK_MODEL=deepseek-flash` par défaut. Le mode LLM reste `simulated` tant que l'agent n'est pas branché et que la politique de données (question 8) n'est pas tranchée.
 - Healthchecks backend/frontend et `restart: unless-stopped`. Ce n'est pas encore un déploiement de production : pas de TLS, de sauvegarde ni de supervision.
 
+## Graphe de connaissance (13 nov. 2026, demandé par l'utilisateur)
+
+- Une vue **Graphe** en lecture seule relie les entités déjà présentes en base : projets, tâches, dépendances, événements, actions du journal, énergie, blocs et messages de l'agent.
+- Elle ne crée ni notes, ni documents, ni nouveau type de connaissance : elle visualise le cerveau d'**organisation** existant et ne rouvre pas le non-goal « base de connaissances longues ».
+- L'API `GET /api/graph` renvoie des nœuds et des arêtes calculés à la demande, sans écriture. Les limites de volume (80 événements, 30 actions, 30 énergies, 20 messages) gardent la vue lisible.
+- Le graphe est un onglet de l'application, pas un nouvel écran par défaut. L'agent reste l'écran central.
+- La vue est volontairement sobre : palette du produit, pas de nouvelle couleur, pas d'animation décorative, filtres par type et panneau de détail.
+
 ## Non décidé
 
 Voir `QUESTIONS.md` pour les choix produit/techniques qui restent ouverts. En particulier, la calibration de la capacité à 60 % après usage réel, l'heure et le fournisseur du digest, l'hébergement, le nom définitif, la mémoire de l'agent et l'évaluation des variantes de commandes restent à trancher.

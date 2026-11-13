@@ -13,6 +13,7 @@ import {
 import NowPanel from './NowPanel'
 import AgentPanel from './AgentPanel'
 import JournalPanel from './JournalPanel'
+import KnowledgeGraphPanel from './KnowledgeGraphPanel'
 import ProjectsPanel from './ProjectsPanel'
 import {
   addDays,
@@ -40,7 +41,7 @@ const KIND_STYLES: Record<EventKind, string> = {
 }
 
 type LoadStatus = 'loading' | 'ready' | 'error'
-type View = 'agent' | 'now' | 'calendar' | 'projects' | 'journal'
+type View = 'agent' | 'now' | 'calendar' | 'projects' | 'journal' | 'graph'
 
 interface CalendarScreenProps {
   user: AuthUser
@@ -313,6 +314,19 @@ export default function CalendarScreen({
             >
               Journal
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={view === 'graph'}
+              onClick={() => setView('graph')}
+              className={`rounded-full px-4 py-1.5 text-sm ${
+                view === 'graph'
+                  ? 'bg-ink text-cream'
+                  : 'border border-ink/15 text-ink/70 hover:border-ink/30'
+              }`}
+            >
+              Graphe
+            </button>
           </div>
 
           <div
@@ -347,7 +361,7 @@ export default function CalendarScreen({
         </header>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_minmax(0,1fr)_20rem]">
-          <div className={`min-w-0 ${view === 'now' ? 'block' : 'hidden lg:block'}`}>
+          <div className={`min-w-0 ${view === 'now' ? 'block' : view === 'graph' ? 'hidden' : 'hidden lg:block'}`}>
             <NowPanel onUnauthorized={onUnauthorized} />
           </div>
 
@@ -552,6 +566,10 @@ export default function CalendarScreen({
 
           <div className={`min-w-0 ${view === 'journal' ? 'block lg:col-span-2' : 'hidden'}`}>
             {view === 'journal' && <JournalPanel onUnauthorized={onUnauthorized} />}
+          </div>
+
+          <div className={`min-w-0 ${view === 'graph' ? 'block lg:col-span-3' : 'hidden'}`}>
+            {view === 'graph' && <KnowledgeGraphPanel onUnauthorized={onUnauthorized} />}
           </div>
         </div>
       </div>

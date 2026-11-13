@@ -15,4 +15,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByIdAndUserId(Long id, Long userId);
 
     List<Event> findByTaskIdIn(Collection<Long> taskIds);
+
+    List<Event> findTop80ByUserIdOrderByStartAtDesc(Long userId);
 }
