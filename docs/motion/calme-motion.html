@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calme — motion</title>
+<style>
+@font-face {
+  font-family: 'Fraunces';
+  src: url('./fraunces.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: #FAF6EE; color: #2B2620; }
+body { font-family: 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif; }
+.stage { position: relative; width: 1600px; height: 900px; overflow: hidden; background: #FAF6EE; }
+.grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(43,38,32,.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(43,38,32,.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+.header { position: absolute; left: 96px; right: 96px; top: 56px; display: flex; justify-content: space-between; align-items: baseline; }
+.wordmark { font-size: 13px; letter-spacing: .28em; text-transform: uppercase; color: #C4704B; font-weight: 600; }
+.scene-tag { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #9A8F82; }
+.footer { position: absolute; left: 96px; right: 96px; bottom: 34px; display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #A79B8D; }
+.progress { position: absolute; left: 96px; right: 96px; bottom: 58px; height: 1px; background: rgba(43,38,32,.09); }
+.progress-bar { width: 0; height: 1px; background: #C4704B; }
+.scene { position: absolute; inset: 0; opacity: 0; }
+.kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: #C4704B; font-weight: 600; }
+h1, h2, h3, .serif { font-family: 'Fraunces', Georgia, serif; font-weight: 500; letter-spacing: -.045em; }
+.mask { overflow: hidden; }
+.mask > span { display: block; transform: translateY(110%); }
+.lead { font-size: 26px; line-height: 1.45; color: #6F6559; letter-spacing: -.01em; }
+.rule { height: 2px; width: 0; background: #C4704B; }
+.tags { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8A7F72; }
+
+/* Scene 1 */
+.s1 { padding: 150px 96px 0; }
+.s1 .kicker { margin-bottom: 26px; }
+.s1 h1 { margin: 0; font-size: 138px; line-height: .9; letter-spacing: -.055em; }
+.s1 .lead { margin: 52px 0 0; max-width: 690px; }
+.s1 .rule { margin-top: 34px; }
+.s1 .tags { margin-top: 18px; }
+
+/* Scene 2 */
+.s2 { padding: 150px 96px 0; }
+.s2 .left { width: 610px; }
+.s2 .kicker { margin-bottom: 22px; }
+.s2 h2 { margin: 0; font-size: 92px; line-height: .92; letter-spacing: -.05em; }
+.s2 .lead { margin-top: 38px; max-width: 480px; font-size: 23px; }
+.chat {
+  position: absolute; right: 96px; top: 145px; width: 620px; padding: 28px 30px 24px;
+  border: 1px solid #E7DFD2; border-radius: 22px; background: #FFFDF8;
+}
+.chat-head { display: flex; justify-content: space-between; align-items: baseline; }
+.chat-head .kicker { font-size: 10px; }
+.chat-head .time { font-size: 10px; color: #A79B8D; letter-spacing: .1em; }
+.chat h3 { margin: 10px 0 20px; font-size: 35px; letter-spacing: -.04em; }
+.bubble { width: 100%; background: #F3ECDF; border-radius: 12px; padding: 14px 16px; font-size: 18px; line-height: 1.48; color: #3A332B; min-height: 58px; }
+.reply { margin-top: 16px; font-size: 18px; line-height: 1.5; color: #4B433A; min-height: 80px; }
+.event-chip { margin-top: 18px; padding: 13px 15px; border: 1px solid #E7DFD2; border-radius: 12px; display: flex; align-items: center; gap: 12px; background: #FAF6EE; }
+.event-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: #8AA07C; flex: none; }
+.event-chip .event-title { font-size: 14px; font-weight: 600; }
+.event-chip .event-meta { font-size: 11px; color: #8A7F72; margin-top: 2px; }
+.chat-foot { margin-top: 20px; padding-top: 13px; border-top: 1px solid #E7DFD2; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #9A8F82; display: flex; justify-content: space-between; }
+
+/* Scene 3 */
+.s3 { padding: 150px 96px 0; }
+.s3 .left { width: 360px; }
+.s3 .kicker { margin-bottom: 20px; }
+.s3 h2 { margin: 0; font-size: 62px; line-height: .96; letter-spacing: -.045em; }
+.steps { margin-top: 46px; space: 0; }
+.step { display: flex; gap: 13px; align-items: flex-start; margin-top: 20px; font-size: 16px; line-height: 1.4; color: #5F564B; opacity: 0; }
+.step .n { width: 22px; height: 22px; border: 1px solid #C4704B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #C4704B; flex: none; margin-top: 1px; }
+.browser { position: absolute; right: 96px; top: 140px; width: 1030px; border: 1px solid #E7DFD2; border-radius: 18px; background: #FFFDF8; overflow: hidden; opacity: 0; }
+.browser-bar { height: 28px; display: flex; align-items: center; gap: 5px; padding: 0 13px; border-bottom: 1px solid #E7DFD2; background: #FAF6EE; }
+.browser-bar i { display: block; width: 5px; height: 5px; border-radius: 50%; background: #D9CEBE; }
+.browser img { display: block; width: 100%; height: 642px; object-fit: cover; object-position: top center; }
+
+/* Scene 4 */
+.s4 { padding: 150px 96px 0; }
+.s4 .left { width: 640px; }
+.s4 .kicker { margin-bottom: 22px; }
+.s4 h2 { margin: 0; font-size: 96px; line-height: .92; letter-spacing: -.05em; }
+.s4 .lead { margin-top: 34px; font-size: 28px; color: #6F6559; }
+.now-card { position: absolute; right: 96px; top: 170px; width: 610px; padding: 32px 34px; border: 1px solid #E7DFD2; border-radius: 22px; background: #FFFDF8; opacity: 0; }
+.now-head { display: flex; justify-content: space-between; align-items: baseline; }
+.now-head .kicker { font-size: 10px; }
+.now-head .block { font-size: 10px; color: #A79B8D; }
+.energy { display: flex; gap: 8px; margin-top: 22px; }
+.energy span { display: flex; align-items: center; gap: 6px; padding: 5px 9px; border: 1px solid #E7DFD2; border-radius: 999px; font-size: 10px; color: #8A7F72; }
+.energy i { width: 6px; height: 6px; border-radius: 50%; background: #C4704B; display: block; }
+.energy .on { border-color: rgba(196,112,75,.45); background: rgba(196,112,75,.08); color: #2B2620; }
+.now-card h3 { margin: 30px 0 6px; font-size: 42px; line-height: 1.05; letter-spacing: -.045em; }
+.now-meta { font-size: 13px; color: #8A7F72; }
+.now-cta { margin-top: 26px; background: #C4704B; color: #FAF6EE; text-align: center; border-radius: 10px; padding: 13px 20px; font-size: 14px; font-weight: 600; }
+.now-secondary { display: flex; gap: 8px; margin-top: 12px; }
+.now-secondary span { border: 1px solid #E7DFD2; border-radius: 999px; padding: 6px 11px; font-size: 10px; color: #6F6559; }
+.now-foot { border-top: 1px solid #E7DFD2; margin-top: 22px; padding-top: 14px; font-size: 10px; color: #A79B8D; }
+
+/* End */
+.s5 { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.s5 .kicker { font-size: 11px; margin-bottom: 22px; }
+.s5 h2 { margin: 0; font-size: 172px; line-height: .9; letter-spacing: -.06em; }
+.s5 p { margin: 26px 0 0; font-size: 24px; color: #6F6559; }
+.s5 .rule { width: 80px; margin-top: 36px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="header">
+    <div class="wordmark">Calme</div>
+    <div class="scene-tag" id="sceneTag">01 / L'agent</div>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="footer"><span>Une journée à la fois</span><span>Motion · 12 s</span></div>
+
+  <section class="scene s1" id="s1">
+    <div class="kicker">Application personnelle d'organisation</div>
+    <h1 class="mask"><span id="s1line1">Une journée</span></h1>
+    <h1 class="mask"><span id="s1line2">à la fois.</span></h1>
+    <p class="lead">L'agent qui transforme vos phrases en un planning réaliste.</p>
+    <div class="rule" id="s1rule"></div>
+    <div class="tags">Calendrier · Tâches · Projets · Journal</div>
+  </section>
+
+  <section class="scene s2" id="s2">
+    <div class="left">
+      <div class="kicker">01 / L'agent</div>
+      <h2 class="mask"><span id="s2line1">Parle.</span></h2>
+      <h2 class="mask"><span id="s2line2">Il s'occupe.</span></h2>
+      <p class="lead">Le serveur valide, puis tout reste annulable.</p>
+    </div>
+    <div class="chat" id="chatCard">
+      <div class="chat-head"><span class="kicker">Agent</span><span class="time">maintenant</span></div>
+      <h3>Parle à Calme.</h3>
+      <div class="bubble" id="userBubble"></div>
+      <div class="reply" id="agentReply" style="opacity:0">C'est ajouté. Je te propose de garder la matinée libre après.</div>
+      <div class="event-chip" id="eventChip" style="opacity:0">
+        <span class="dot"></span>
+        <div><div class="event-title">Cours · Deep Learning</div><div class="event-meta">demain · 09:00 – 10:00</div></div>
+      </div>
+      <div class="chat-foot"><span>Le serveur valide</span><span>Tout reste annulable</span></div>
+    </div>
+  </section>
+
+  <section class="scene s3" id="s3">
+    <div class="left">
+      <div class="kicker">02 / Le contrôle</div>
+      <h2 class="mask"><span id="s3line1">Le serveur</span></h2>
+      <h2 class="mask"><span id="s3line2">décide.</span></h2>
+      <div class="steps">
+        <div class="step" id="step1"><span class="n">1</span><span>L'agent propose.</span></div>
+        <div class="step" id="step2"><span class="n">2</span><span>Le serveur valide.</span></div>
+        <div class="step" id="step3"><span class="n">3</span><span>Tout reste annulable.</span></div>
+      </div>
+    </div>
+    <div class="browser" id="browser">
+      <div class="browser-bar"><i></i><i></i><i></i></div>
+      <img src="../screenshots/agent.png" alt="">
+    </div>
+  </section>
+
+  <section class="scene s4" id="s4">
+    <div class="left">
+      <div class="kicker">03 / Le calme</div>
+      <h2 class="mask"><span id="s4line1">Une seule</span></h2>
+      <h2 class="mask"><span id="s4line2">action.</span></h2>
+      <p class="lead">Puis le calme.</p>
+    </div>
+    <div class="now-card" id="nowCard">
+      <div class="now-head"><span class="kicker">Maintenant</span><span class="block">École</span></div>
+      <div class="energy"><span><i></i>Bon</span><span class="on"><i></i>Moyen</span><span><i></i>Bas</span></div>
+      <h3>Relire le plan du chapitre 2</h3>
+      <div class="now-meta">10 min · Normal</div>
+      <div class="now-cta">Je commence</div>
+      <div class="now-secondary"><span>Plus tard</span><span>Trop lourd ce soir</span></div>
+      <div class="now-foot">Ajouter une tâche</div>
+    </div>
+  </section>
+
+  <section class="scene s5" id="s5">
+    <div class="kicker">Calme</div>
+    <h2>Calme.</h2>
+    <p>Une journée à la fois.</p>
+    <div class="rule" id="s5rule"></div>
+  </section>
+</div>
+
+<script>
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const p = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const eio = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const fade = (t, inA, inB, outA, outB) => Math.min(p(t, inA, inB), 1 - p(t, outA, outB));
+const $ = (id) => document.getElementById(id);
+
+const userText = "Ajoute un cours demain de 9h à 10h.";
+const tag = $('sceneTag');
+
+window.DURATION = 12;
+
+window.seek = (t) => {
+  t = clamp(t, 0, 12);
+
+  const s1 = fade(t, 0.15, 0.6, 2.15, 2.55);
+  $('s1').style.opacity = s1;
+  $('s1line1').style.transform = `translateY(${(1 - eo(p(t, 0.35, 1.05))) * 110}%)`;
+  $('s1line2').style.transform = `translateY(${(1 - eo(p(t, 0.5, 1.2))) * 110}%)`;
+  $('s1rule').style.width = `${eo(p(t, 1.0, 1.55)) * 86}px`;
+
+  const s2 = fade(t, 2.35, 2.8, 5.45, 5.85);
+  $('s2').style.opacity = s2;
+  $('s2line1').style.transform = `translateY(${(1 - eo(p(t, 2.55, 3.05))) * 110}%)`;
+  $('s2line2').style.transform = `translateY(${(1 - eo(p(t, 2.68, 3.18))) * 110}%)`;
+  $('chatCard').style.opacity = p(t, 2.85, 3.35);
+  $('chatCard').style.transform = `translateY(${(1 - eo(p(t, 2.85, 3.35))) * 32}px)`;
+  const typed = Math.floor(p(t, 3.15, 4.05) * userText.length);
+  $('userBubble').textContent = userText.slice(0, typed);
+  $('agentReply').style.opacity = eo(p(t, 4.18, 4.48));
+  $('eventChip').style.opacity = eo(p(t, 4.62, 4.92));
+  $('eventChip').style.transform = `translateY(${(1 - eo(p(t, 4.62, 4.92))) * 10}px)`;
+
+  const s3 = fade(t, 5.65, 6.1, 8.35, 8.75);
+  $('s3').style.opacity = s3;
+  $('s3line1').style.transform = `translateY(${(1 - eo(p(t, 5.85, 6.3))) * 110}%)`;
+  $('s3line2').style.transform = `translateY(${(1 - eo(p(t, 5.98, 6.43))) * 110}%)`;
+  $('browser').style.opacity = p(t, 6.0, 6.45);
+  $('browser').style.transform = `translateX(${(1 - eo(p(t, 6.0, 6.55))) * 60}px) scale(${1.035 - eo(p(t, 6.0, 8.2)) * 0.035})`;
+  [['step1', 6.35], ['step2', 6.95], ['step3', 7.55]].forEach(([id, at]) => {
+    const el = $(id);
+    el.style.opacity = eo(p(t, at, at + 0.3));
+    el.style.transform = `translateY(${(1 - eo(p(t, at, at + 0.3))) * 8}px)`;
+  });
+
+  const s4 = fade(t, 8.75, 9.2, 10.55, 10.95);
+  $('s4').style.opacity = s4;
+  $('s4line1').style.transform = `translateY(${(1 - eo(p(t, 8.95, 9.4))) * 110}%)`;
+  $('s4line2').style.transform = `translateY(${(1 - eo(p(t, 9.08, 9.53))) * 110}%)`;
+  $('nowCard').style.opacity = p(t, 9.15, 9.65);
+  $('nowCard').style.transform = `translateY(${(1 - eo(p(t, 9.15, 9.65))) * 34}px)`;
+
+  const s5 = fade(t, 10.65, 11.15, 11.75, 12.0);
+  $('s5').style.opacity = s5;
+  $('s5rule').style.width = `${eo(p(t, 11.0, 11.35)) * 80}px`;
+
+  $('progressBar').style.width = `${(t / 12) * 100}%`;
+  tag.textContent = t < 2.55 ? "Intro" : t < 5.85 ? "01 / L'agent" : t < 8.75 ? "02 / Le contrôle" : t < 10.9 ? "03 / Le calme" : "Calme";
+};
+
+// Affiche la première image avant le rendu.
+window.seek(0);
+</script>
+</body>
+</html>
