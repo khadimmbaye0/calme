@@ -7,6 +7,8 @@ export interface AgentMessage {
   role: AgentRole
   content: string
   createdAt: string
+  hasImage?: boolean
+  imageUrl?: string
 }
 
 export interface AgentAction {
@@ -28,11 +30,22 @@ export interface AgentChatResponse {
   error: boolean
 }
 
-export function fetchAgentMessages(): Promise<AgentMessage[]> {
-  return request<AgentMessage[]>('/api/agent/messages')
+export async function fetchAgentMessages(): Promise<AgentMessage[]> {
+  const messages = await request<AgentMessage[]>('/api/agent/messages')
+  return messages.map((message) => ({
+    ...message,
+    imageUrl: message.hasImage ? `/api/agent/messages/${message.id}/image` : undefined,
+  }))
 }
 
-export function sendAgentMessage(message: string): Promise<AgentChatResponse> {
+export function sendAgentMessage(message: string, image?: File | null): Promise<AgentChatResponse> {
+  if (image) {
+    const body = new FormData()
+    body.append('message', message)
+    body.append('image', image)
+    return request<AgentChatResponse>('/api/agent/chat', { method: 'POST', body })
+  }
+
   return request<AgentChatResponse>('/api/agent/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

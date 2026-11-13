@@ -26,7 +26,7 @@ async function problemDetail(response: Response, fallback: string): Promise<stri
 
 export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)
-  if (init.body) {
+  if (init.body && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
 

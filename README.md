@@ -5,7 +5,7 @@
 <div align="center">
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml"><img alt="Fixtures" src="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml/badge.svg?branch=main"></a>
-  <img alt="Tests" src="https://img.shields.io/badge/tests-59%20backend%20%C2%B7%2038%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-62%20backend%20%C2%B7%2039%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
 </div>
 
 <div align="center">
@@ -22,15 +22,15 @@
   <sub>Un agent central, un calendrier qui protège les engagements, et une seule chose à la fois.</sub>
 </p>
 
-> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek et graphe de connaissance. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
+> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek, graphe de connaissance et lecture d’images. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
 
 ---
 
 ## Le film
 
-<img src="docs/screenshots/calme-motion.gif" alt="Film de présentation de Calme — 20 secondes" width="100%">
+<img src="docs/screenshots/calme-motion.gif" alt="Film de présentation de Calme — 24 secondes, avec la lecture d’une image" width="100%">
 
-<p align="center"><sub>20 secondes, une bande sonore originale — <a href="docs/videos/calme-motion.mp4"><strong>voir le film sonore</strong></a> · <a href="docs/MOTION.md">storyboard, son et fabrication</a>.<br>Le GIF est un aperçu muet ; le MP4 contient le son.</sub></p>
+<p align="center"><sub>24 secondes, une bande sonore originale — <a href="docs/videos/calme-motion.mp4"><strong>voir le film sonore</strong></a> · <a href="docs/MOTION.md">storyboard, son et fabrication</a>.<br>Le GIF est un aperçu muet ; le MP4 contient le son. Le film inclut la lecture d’une image.</sub></p>
 
 ---
 
@@ -49,6 +49,14 @@
 Le **graphe de connaissance** est une lecture de ce que Calme organise déjà. Il relie les projets à leurs tâches, les tâches à leurs dépendances et à leurs créneaux, les actions du journal à leur cible, l'énergie aux tâches reportées, et les blocs d'alternance aux dates qu'ils couvrent.
 
 Filtres par famille, recherche, zoom, déplacement et détail au clic. Le graphe est **en lecture seule** : il ne crée aucune donnée et n'est jamais envoyé au LLM. Les relations et les limites sont documentées dans [`docs/GRAPH.md`](docs/GRAPH.md).
+
+### Une image aussi
+
+<img src="docs/screenshots/image-input.png" alt="Calme lit un planning photographié et en extrait les rendez-vous" width="100%">
+
+<p align="center"><sub>Extrait du film : une image lue, trois rendez-vous extraits, deux créneaux proposés.</sub></p>
+
+Joins un planning, une capture d’écran ou une photo de tableau. L’agent lit les dates, heures et titres utiles, puis propose l’action d’organisation adaptée. Formats **JPEG, PNG, GIF et WebP**, **8 Mo maximum**. L’image est stockée avec la conversation et envoyée à DeepSeek pour être comprise.
 
 ### Calendrier, projets, journal et mobile
 
@@ -79,6 +87,8 @@ Filtres par famille, recherche, zoom, déplacement et détail au clic. Le graphe
   </tr>
 </table>
 
+**Images** — un planning photographié, une capture d’écran ou une photo de tableau : Calme lit, extrait et propose.
+
 ---
 
 ## L'agent, sous contrôle
@@ -88,6 +98,8 @@ Filtres par famille, recherche, zoom, déplacement et détail au clic. Le graphe
 > **Calme** — C'est ajouté. Je garde la matinée libre après.
 
 Le modèle **propose** des appels d'outils : calendrier, tâches, projets, énergie, Maintenant et journal. Le backend applique les règles de conflit, de capacité, de dépendance et de confirmation, puis journalise l'action avec son inverse. Le LLM ne touche jamais directement la base.
+
+Une image peut remplacer un long paragraphe : joins un planning ou une capture, et l'agent la lit avant de proposer. Une seule image est envoyée par tour, et la dernière image de la conversation reste disponible pour la question suivante.
 
 Sans clé, l'application démarre en mode `simulated` et ne fait aucun appel réseau. Pour le mode réel :
 
@@ -183,7 +195,8 @@ L'API détaillée et les exemples `curl` sont dans [`docs/API.md`](docs/API.md).
 - CSRF désactivé pour cette application locale non exposée ; à revoir avant toute mise en ligne.
 - Pas de 2FA, pas de TLS, pas de sauvegarde automatique : ce n'est pas encore un déploiement de production.
 - Les secrets restent dans `.env` (ignoré, mode `600`) et ne sont jamais intégrés aux images.
-- En mode DeepSeek, le message, la date, le bloc, l'énergie et les données nécessaires aux outils transitent par l'API. Pas de mot de passe, secret ou donnée d'entreprise.
+- En mode DeepSeek, le message, la date, le bloc, l'énergie, l'image jointe et les données nécessaires aux outils transitent par l'API. Pas de mot de passe, secret ou donnée d'entreprise.
+- Les images sont limitées à 8 Mo, validées par leur contenu réel (JPEG, PNG, GIF, WebP), stockées en base et servies uniquement à la session authentifiée.
 - Le mode `simulated` reste disponible pour développer sans réseau.
 
 ---
@@ -192,8 +205,8 @@ L'API détaillée et les exemples `curl` sont dans [`docs/API.md`](docs/API.md).
 
 | Suite | Commande | Résultat |
 |---|---|---|
-| Backend | `cd backend && mvn test` | **59 tests** |
-| Frontend | `cd frontend && npm test` | **38 tests** |
+| Backend | `cd backend && mvn test` | **62 tests** |
+| Frontend | `cd frontend && npm test` | **39 tests** |
 | Build | `cd frontend && npm run build` | TypeScript + Vite |
 | Fixtures | `python3 scripts/validate_fixtures.py` | Contrat et fixtures valides |
 

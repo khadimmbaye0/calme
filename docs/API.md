@@ -110,6 +110,15 @@ curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/chat \
   -H 'Content-Type: application/json' \
   -d '{"message":"Ajoute un cours demain de 9h à 10h."}'
 
+# Envoyer une image avec une phrase (multipart, 8 Mo max)
+curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/chat \
+  -F 'message=Ajoute ce planning à mon agenda.' \
+  -F 'image=@planning.png;type=image/png'
+
+# Récupérer une image de la conversation (session requise)
+curl -b /tmp/calme-cookies.txt \
+  http://localhost:5173/api/agent/messages/1/image -o planning.png
+
 # Historique de la conversation
 curl -b /tmp/calme-cookies.txt http://localhost:5173/api/agent/messages
 
@@ -119,6 +128,8 @@ curl -b /tmp/calme-cookies.txt -X POST http://localhost:5173/api/agent/cancel/<i
 ```
 
 L'agent propose des appels d'outils ; le backend valide et exécute. Une suppression ou un plan de plus de 10 éléments attend une confirmation. Chaque action réussie est journalisée et annulable.
+
+Les images acceptées sont **JPEG, PNG, GIF et WebP**, jusqu'à **8 Mo**. Le type est détecté sur les octets, pas sur l'extension. L'image est stockée avec le message, servie uniquement à la session authentifiée, et transmise à DeepSeek Vision pour être lue.
 
 ## Santé
 

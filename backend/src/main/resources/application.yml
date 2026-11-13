@@ -11,6 +11,10 @@ spring:
       ddl-auto: none
   flyway:
     enabled: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 10MB
 
 management:
   endpoints:

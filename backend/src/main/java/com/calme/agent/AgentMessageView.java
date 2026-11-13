@@ -6,13 +6,15 @@ public record AgentMessageView(
         Long id,
         AgentMessageRole role,
         String content,
-        Instant createdAt) {
+        Instant createdAt,
+        boolean hasImage) {
 
-    public static AgentMessageView from(AgentMessage message) {
+    public static AgentMessageView from(AgentMessage message, boolean hasImage) {
         return new AgentMessageView(
                 message.getId(),
                 message.getRole(),
                 message.getContent(),
-                message.getCreatedAt());
+                message.getCreatedAt(),
+                hasImage);
     }
 }

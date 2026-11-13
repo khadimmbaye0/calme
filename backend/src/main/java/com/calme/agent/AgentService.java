@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,8 +29,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AgentService {
@@ -40,6 +44,7 @@ public class AgentService {
 
     private final CurrentUserService currentUser;
     private final AgentMessageRepository messages;
+    private final AgentMessageImageRepository images;
     private final LlmClient llm;
     private final AgentToolRegistry tools;
     private final AgentToolExecutor executor;
@@ -53,6 +58,7 @@ public class AgentService {
     public AgentService(
             CurrentUserService currentUser,
             AgentMessageRepository messages,
+            AgentMessageImageRepository images,
             LlmClient llm,
             AgentToolRegistry tools,
             AgentToolExecutor executor,
@@ -63,6 +69,7 @@ public class AgentService {
             Clock clock) {
         this.currentUser = currentUser;
         this.messages = messages;
+        this.images = images;
         this.llm = llm;
         this.tools = tools;
         this.executor = executor;
@@ -78,14 +85,42 @@ public class AgentService {
         AppUser user = currentUser.requireCurrentUser();
         List<AgentMessage> recent = new ArrayList<>(messages.findTop30ByUserIdOrderByCreatedAtDescIdDesc(user.getId()));
         Collections.reverse(recent);
-        return recent.stream().map(AgentMessageView::from).toList();
+        Set<Long> ids = recent.stream().map(AgentMessage::getId).collect(java.util.stream.Collectors.toSet());
+        Set<Long> withImage = ids.isEmpty()
+                ? Set.of()
+                : images.findByMessageIds(ids).stream()
+                        .map(image -> image.getMessage().getId())
+                        .collect(java.util.stream.Collectors.toSet());
+        return recent.stream()
+                .map(message -> AgentMessageView.from(message, withImage.contains(message.getId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AgentImage image(long id) {
+        AppUser user = currentUser.requireCurrentUser();
+        AgentMessage message = messages.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable."));
+        AgentMessageImage image = images.findByMessage_Id(message.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image introuvable."));
+        return new AgentImage(image.getMediaType(), image.getData());
     }
 
     public AgentChatResponse chat(String rawMessage) {
+        return chat(rawMessage, null);
+    }
+
+    public AgentChatResponse chat(String rawMessage, AgentImageInput image) {
         AppUser user = currentUser.requireCurrentUser();
         String message = rawMessage == null ? "" : rawMessage.trim();
+        if (message.isBlank() && image == null) {
+            return response("Écris une phrase ou joins une image pour que je puisse t'aider.", List.of(), null, null, true);
+        }
+        if (message.length() > 2000) {
+            throw new IllegalArgumentException("Le message doit faire 2000 caractères maximum.");
+        }
         if (message.isBlank()) {
-            return response("Écris une phrase pour que je puisse t'aider.", List.of(), null, null, true);
+            message = "Regarde cette image.";
         }
 
         List<AgentMessage> history = new ArrayList<>(
@@ -95,17 +130,37 @@ public class AgentService {
             history = history.subList(history.size() - HISTORY_MESSAGES, history.size());
         }
 
+        Set<Long> historyIds = history.stream().map(AgentMessage::getId).collect(java.util.stream.Collectors.toSet());
+        Map<Long, AgentMessageImage> imageByMessage = new LinkedHashMap<>();
+        if (!historyIds.isEmpty()) {
+            for (AgentMessageImage stored : images.findByMessageIds(historyIds)) {
+                imageByMessage.put(stored.getMessage().getId(), stored);
+            }
+        }
+        AgentMessage lastImageMessage = history.stream()
+                .filter(previous -> previous.getRole() == AgentMessageRole.USER)
+                .filter(previous -> imageByMessage.containsKey(previous.getId()))
+                .reduce((left, right) -> right)
+                .orElse(null);
+
         List<LlmMessage> conversation = new ArrayList<>();
         conversation.add(LlmMessage.system(systemPrompt(user)));
         for (AgentMessage previous : history) {
             if (previous.getRole() == AgentMessageRole.USER) {
-                conversation.add(LlmMessage.user(previous.getContent()));
+                AgentMessageImage previousImage = imageByMessage.get(previous.getId());
+                String imageDataUrl = image == null && previous == lastImageMessage && previousImage != null
+                        ? dataUrl(previousImage)
+                        : null;
+                conversation.add(LlmMessage.user(previous.getContent(), imageDataUrl));
             } else {
                 conversation.add(LlmMessage.assistant(previous.getContent(), List.of()));
             }
         }
-        conversation.add(LlmMessage.user(message));
-        messages.save(new AgentMessage(user, AgentMessageRole.USER, message));
+        conversation.add(LlmMessage.user(message, image == null ? null : image.dataUrl()));
+        AgentMessage saved = messages.save(new AgentMessage(user, AgentMessageRole.USER, message));
+        if (image != null) {
+            images.save(new AgentMessageImage(saved, image.mediaType(), image.bytes()));
+        }
 
         List<AgentActionView> actions = new ArrayList<>();
         boolean mutated = false;
@@ -268,6 +323,11 @@ public class AgentService {
         }
     }
 
+    private String dataUrl(AgentMessageImage image) {
+        return "data:" + image.getMediaType() + ";base64,"
+                + java.util.Base64.getEncoder().encodeToString(image.getData());
+    }
+
     private String systemPrompt(AppUser user) {
         ZoneId zone = ZoneId.of(user.getTimezone());
         LocalDate today = LocalDate.now(clock.withZone(zone));
@@ -296,6 +356,9 @@ public class AgentService {
                 - Après une action, explique-la en une phrase.
                 - Ne demande jamais de mot de passe ni de donnée sensible.
                 - Si un outil échoue, explique calmement et propose une alternative.
+                - Si une image est jointe, lis-la comme un document ou un écran : repère les dates,
+                  heures, titres et détails utiles, puis propose l'action d'organisation adaptée.
+                  Ne recopie pas toute l'image ; résume ce que tu en retiens en une phrase.
                 """.formatted(
                 today,
                 now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

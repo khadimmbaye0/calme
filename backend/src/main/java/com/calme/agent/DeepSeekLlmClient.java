@@ -110,7 +110,18 @@ public class DeepSeekLlmClient implements LlmClient {
             return payload;
         }
 
-        payload.put("content", message.content() == null ? "" : message.content());
+        if (message.imageDataUrl() != null && "user".equals(message.role())) {
+            List<Map<String, Object>> content = new ArrayList<>();
+            if (message.content() != null && !message.content().isBlank()) {
+                content.add(Map.of("type", "text", "text", message.content()));
+            }
+            content.add(Map.of(
+                    "type", "image_url",
+                    "image_url", Map.of("url", message.imageDataUrl(), "detail", "auto")));
+            payload.put("content", content);
+        } else {
+            payload.put("content", message.content() == null ? "" : message.content());
+        }
         if (message.toolCalls() != null && !message.toolCalls().isEmpty()) {
             payload.put("tool_calls", message.toolCalls().stream()
                     .map(call -> Map.of(

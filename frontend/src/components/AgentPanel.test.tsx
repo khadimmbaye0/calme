@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import AgentPanel from './AgentPanel'
 
@@ -13,6 +13,7 @@ function response(body: unknown, status = 200): Response {
 describe('AgentPanel', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   it('charge la conversation et envoie un message', async () => {
@@ -57,6 +58,52 @@ describe('AgentPanel', () => {
     expect(JSON.parse(String(postCall?.[1]?.body))).toEqual({ message: 'Ajoute un cours' })
   })
 
+  it('joint une image et l’envoie en multipart', async () => {
+    const createObjectURL = vi.fn(() => 'blob:plan')
+    Object.defineProperty(URL, 'createObjectURL', { value: createObjectURL, configurable: true })
+    Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true })
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.endsWith('/api/agent/messages')) {
+        return response([])
+      }
+      if (url.endsWith('/api/agent/chat') && init?.method === 'POST') {
+        return response({
+          message: 'J’ai lu le plan. Je te propose un créneau.',
+          actions: [],
+          pendingConfirmation: null,
+          undoableActionId: null,
+          error: false,
+        })
+      }
+      return response({}, 404)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<AgentPanel onUnauthorized={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByText(/chargement de la conversation/i)).not.toBeInTheDocument())
+    const file = new File(['png'], 'plan.png', { type: 'image/png' })
+    fireEvent.change(screen.getByLabelText('Joindre une image'), {
+      target: { files: [file] },
+    })
+
+    expect(screen.getByAltText('Aperçu de l’image jointe')).toHaveAttribute('src', 'blob:plan')
+    fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }))
+
+    expect(await screen.findByText('J’ai lu le plan. Je te propose un créneau.')).toBeInTheDocument()
+    expect(screen.getByAltText('Image jointe à la conversation')).toHaveAttribute('src', 'blob:plan')
+
+    const postCall = fetchMock.mock.calls.find(
+      ([input, init]) => String(input).endsWith('/api/agent/chat') && init?.method === 'POST',
+    )
+    expect(postCall).toBeDefined()
+    const body = postCall?.[1]?.body
+    expect(body).toBeInstanceOf(FormData)
+    expect((body as FormData).get('message')).toBe('')
+    expect((body as FormData).get('image')).toBe(file)
+  })
+
   it('demande confirmation avant une suppression', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input)
@@ -90,6 +137,7 @@ describe('AgentPanel', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     render(<AgentPanel onUnauthorized={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByText(/chargement de la conversation/i)).not.toBeInTheDocument())
     fireEvent.change(screen.getByLabelText('Votre message'), {
       target: { value: 'Supprime le cours' },
     })
@@ -125,6 +173,7 @@ describe('AgentPanel', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     render(<AgentPanel onUnauthorized={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByText(/chargement de la conversation/i)).not.toBeInTheDocument())
     fireEvent.change(screen.getByLabelText('Votre message'), { target: { value: 'Crée un cours' } })
     fireEvent.click(screen.getByRole('button', { name: 'Envoyer' }))
     await screen.findByRole('button', { name: 'Annuler la dernière action' })
