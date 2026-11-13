@@ -2,7 +2,7 @@
 
 ## Intention
 
-Une boucle silencieuse de **14 secondes** pour présenter Calme en mouvement, sans trahir la direction artistique du produit : papier chaud, typographie éditoriale, aucune animation gratuite.
+Une boucle silencieuse de **16 secondes** pour présenter Calme en mouvement, sans trahir la direction artistique du produit : papier chaud, typographie éditoriale, aucune animation gratuite.
 
 Le mouvement suit une idée simple : une phrase devient une action, l'action est vérifiée, puis il ne reste qu'une chose à faire.
 
@@ -11,10 +11,10 @@ Le mouvement suit une idée simple : une phrase devient une action, l'action est
 | Temps | Scène | Contenu |
 |---|---|---|
 | 0–3 s | Intro | « Une journée à la fois. » et la promesse de l'agent |
-| 3–7 s | L'agent | « Parle. Il s'occupe. » ; message, réponse et événement ajouté |
-| 7–10,3 s | Le contrôle | L'écran Agent ; l'agent propose, le serveur valide, tout reste annulable |
-| 10,3–12,8 s | Le calme | « Une seule action. » et la carte Maintenant |
-| 12,8–14 s | Fin | « Calme. » et la signature |
+| 3–7,8 s | L'agent | « Parle. Il s'occupe. » ; curseur, clic d'envoi, réponse et événement vérifié |
+| 7,8–11,8 s | Le contrôle | L'écran Agent ; l'agent propose, le serveur valide, tout reste annulable |
+| 11,8–14,8 s | Le calme | « Une seule action. », carte Maintenant et entrée de journal annulable |
+| 14,8–16 s | Fin | « Calme. » et la signature |
 
 ## Direction
 
@@ -24,12 +24,22 @@ Le mouvement suit une idée simple : une phrase devient une action, l'action est
 - Transitions par masques typographiques, opacité et translations courtes.
 - Le GIF est la version intégrée au README ; le MP4 est la version haute définition liée.
 
+## Micro-mouvements
+
+- Un fil terracotta traverse les scènes et se dessine progressivement.
+- Le curseur se déplace vers le bouton d'envoi, clique, puis laisse place aux points de saisie.
+- La carte événement apparaît avec une coche dessinée.
+- Le titre varie légèrement de graisse grâce à la police variable.
+- La grille dérive très lentement pour donner de la profondeur.
+- Les sorties de scènes conservent un follow-through court.
+- Le journal apparaît en fin de boucle pour rappeler que tout reste annulable.
+
 ## Fabrication
 
 La séquence est pilotée par une seule timeline : une page HTML de 1600 × 900 px expose `window.seek(t)`, qui positionne chaque élément à l'instant demandé. Il n'y a ni librairie d'animation ni vidéo générative.
 
 1. Le HTML [calme-motion.html](motion/calme-motion.html) contient la scène, la typographie et la timeline.
-2. Chromium headless rend 420 images à 30 fps (14 s).
+2. Chromium headless rend 480 images à 30 fps (16 s).
 3. FFmpeg encode le MP4 H.264, puis le GIF 1000 × 563 à 15 fps avec une palette de 96 couleurs.
 
 ```bash
