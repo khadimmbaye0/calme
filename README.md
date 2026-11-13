@@ -1,32 +1,38 @@
 <div align="center">
-  <img src="docs/screenshots/banner.png" alt="Calme — une journée à la fois" width="100%">
+  <img src="docs/screenshots/banner.png" alt="Calme — une journée à la fois. Un agent, un graphe, une seule action." width="100%">
 </div>
 
 <div align="center">
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/khadimmbaye0/calme/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml"><img alt="Fixtures" src="https://github.com/khadimmbaye0/calme/actions/workflows/validate-fixtures.yml/badge.svg?branch=main"></a>
+  <img alt="Tests" src="https://img.shields.io/badge/tests-59%20backend%20%C2%B7%2038%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
+</div>
+
+<div align="center">
   <img alt="Java 21" src="https://img.shields.io/badge/Java-21-C4704B?style=flat-square&amp;labelColor=2B2620&amp;logo=openjdk&amp;logoColor=FAF6EE">
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring%20Boot-3.5-C4704B?style=flat-square&amp;labelColor=2B2620&amp;logo=springboot&amp;logoColor=FAF6EE">
   <img alt="React 19" src="https://img.shields.io/badge/React-19-8AA07C?style=flat-square&amp;labelColor=2B2620&amp;logo=react&amp;logoColor=FAF6EE">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-8AA07C?style=flat-square&amp;labelColor=2B2620&amp;logo=postgresql&amp;logoColor=FAF6EE">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2B2620?style=flat-square&amp;labelColor=C4704B&amp;logo=docker&amp;logoColor=FAF6EE">
   <img alt="Agent DeepSeek" src="https://img.shields.io/badge/Agent-DeepSeek-C4704B?style=flat-square&amp;labelColor=2B2620">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-59%20backend%20%C2%B7%2038%20frontend-8AA07C?style=flat-square&amp;labelColor=2B2620">
 </div>
 
-<br>
+<p align="center">
+  <strong>Planifier moins. Garder de la marge. Respirer.</strong><br>
+  <sub>Un agent central, un calendrier qui protège les engagements, et une seule chose à la fois.</sub>
+</p>
 
-**Calme** est une application personnelle d'organisation qui transforme une phrase en une journée réaliste.
+> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek et graphe de connaissance. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
 
-Un agent central, un calendrier qui protège les engagements, un écran « Maintenant » qui n'affiche qu'une action, et un journal qui rend chaque décision annulable.
+---
 
-> **MVP local fonctionnel** — calendrier, « Maintenant », projets, journal, agent DeepSeek, graphe de connaissance et interface responsive. Le digest, la replanification avancée et l'évaluation des variantes de commandes restent ouverts.
+## Le film
 
-## En mouvement
+<img src="docs/screenshots/calme-motion.gif" alt="Film de présentation de Calme — 20 secondes" width="100%">
 
-<img src="docs/screenshots/calme-motion.gif" alt="Animation de présentation de Calme" width="100%">
+<p align="center"><sub>20 secondes, une bande sonore originale — <a href="docs/videos/calme-motion.mp4"><strong>voir le film sonore</strong></a> · <a href="docs/MOTION.md">storyboard, son et fabrication</a>.<br>Le GIF est un aperçu muet ; le MP4 contient le son.</sub></p>
 
-<p align="center"><sub>Boucle de 20 secondes — <a href="docs/videos/calme-motion.mp4"><strong>voir le film sonore (MP4)</strong></a> · <a href="docs/MOTION.md">storyboard, son et fabrication</a>.<br>Le GIF est un aperçu muet ; le MP4 contient la bande sonore originale.</sub></p>
+---
 
 ## Aperçu
 
@@ -38,7 +44,11 @@ Un agent central, un calendrier qui protège les engagements, un écran « Maint
 
 <img src="docs/screenshots/graph.png" alt="Graphe de connaissance reliant projets, tâches, moments, énergie, blocs, journal et messages" width="100%">
 
-<p align="center"><sub>Un graphe en lecture seule : filtres, recherche, détail au clic, zoom et déplacement.</sub></p>
+<p align="center"><sub>Projets, tâches, moments, énergie, blocs, journal et messages — dans une seule carte.</sub></p>
+
+Le **graphe de connaissance** est une lecture de ce que Calme organise déjà. Il relie les projets à leurs tâches, les tâches à leurs dépendances et à leurs créneaux, les actions du journal à leur cible, l'énergie aux tâches reportées, et les blocs d'alternance aux dates qu'ils couvrent.
+
+Filtres par famille, recherche, zoom, déplacement et détail au clic. Le graphe est **en lecture seule** : il ne crée aucune donnée et n'est jamais envoyé au LLM. Les relations et les limites sont documentées dans [`docs/GRAPH.md`](docs/GRAPH.md).
 
 ### Calendrier, projets, journal et mobile
 
@@ -50,28 +60,46 @@ Un agent central, un calendrier qui protège les engagements, un écran « Maint
 
 <p align="center"><sub>Captures réalisées avec un jeu de données de démonstration.</sub></p>
 
+---
+
 ## Ce que fait Calme
 
-### Agent central
-Parle naturellement : « ajoute un cours demain de 9h à 10h », « qu'est-ce que je fais maintenant ? », « planifie mon mémoire ». L'agent appelle des outils, le backend vérifie, puis l'action est journalisée.
+<table>
+  <tr>
+    <td width="50%" valign="top"><strong>Agent central</strong><br>Une phrase suffit. L'agent appelle des outils, le backend vérifie les règles, puis l'action est journalisée et annulable.</td>
+    <td width="50%" valign="top"><strong>Maintenant</strong><br>Une seule action, 25 minutes maximum. L'énergie se déclare en un geste ; en énergie basse, les tâches non critiques sont reportées.</td>
+  </tr>
+  <tr>
+    <td valign="top"><strong>Calendrier</strong><br>Vue jour, événements fixes, planifiés et disponibilités. Les conflits sont signalés avant écriture.</td>
+    <td valign="top"><strong>Projets</strong><br>Objectif, échéance, étapes, dépendances validées en DAG et buffer de 20 % minimum.</td>
+  </tr>
+  <tr>
+    <td valign="top"><strong>Journal & contrôle</strong><br>Les 30 dernières actions sont visibles, expliquées et annulables. Les suppressions et les gros plans demandent confirmation.</td>
+    <td valign="top"><strong>Graphe</strong><br>Tout ce qui est organisé, relié dans une carte calme. Une lecture, pas une nouvelle source de vérité.</td>
+  </tr>
+</table>
 
-### Calendrier
-Vue jour, événements fixes, planifiés et disponibilités. Les conflits sont signalés avant écriture ; les événements fixes ne sont jamais déplacés silencieusement.
+---
 
-### Maintenant
-Une seule action, avec une durée maximale de 25 minutes et un titre de 80 caractères. L'énergie se déclare en un geste ; en énergie basse, les tâches non critiques sont reportées.
+## L'agent, sous contrôle
 
-### Projets
-Objectif, échéance, étapes, dépendances validées en DAG, buffer de 20 % minimum et planification dans les créneaux libres. La progression se met à jour à chaque étape terminée.
+> **Vous** — Ajoute un cours demain de 9h à 10h.
+>
+> **Calme** — C'est ajouté. Je garde la matinée libre après.
 
-### Journal et contrôle
-Les 30 dernières actions sont visibles, expliquées en une phrase et annulables. Une suppression d'événement ou un plan de plus de 10 éléments demande une confirmation.
+Le modèle **propose** des appels d'outils : calendrier, tâches, projets, énergie, Maintenant et journal. Le backend applique les règles de conflit, de capacité, de dépendance et de confirmation, puis journalise l'action avec son inverse. Le LLM ne touche jamais directement la base.
 
-### Graphe de connaissance
-Une carte en lecture seule relie projets, tâches, dépendances, moments, énergie, blocs, actions et messages. Filtres par famille, recherche, panneau de détail et navigation au clic. Le graphe ne crée aucune donnée et ne part jamais vers le LLM.
+Sans clé, l'application démarre en mode `simulated` et ne fait aucun appel réseau. Pour le mode réel :
 
-### Interface
-Papier chaud, titres Fraunces, cartes filaires et aucune animation décorative. Le chat, les formulaires et les listes restent utilisables de 320 px au desktop.
+```bash
+DEEPSEEK_API_KEY=<votre-clé>
+CALME_LLM_MODE=deepseek
+DEEPSEEK_MODEL=deepseek-flash
+```
+
+La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/AGENT_CONTRACT.md`](docs/AGENT_CONTRACT.md).
+
+---
 
 ## Architecture
 
@@ -83,9 +111,10 @@ flowchart LR
   API --> LLM["DeepSeek · tool calling"]
   LLM -->|"outils validés"| SERVICES
   SERVICES --> JOURNAL["Journal & undo"]
+  JOURNAL --> DB
+  API --> GRAPH["Graphe · lecture seule"]
+  GRAPH --> DB
 ```
-
-Le LLM ne touche jamais la base. Il propose des appels d'outils ; le backend applique les règles de conflit, de capacité, de dépendances et de confirmation, puis journalise l'action et son inverse.
 
 | Couche | Choix |
 |---|---|
@@ -95,7 +124,9 @@ Le LLM ne touche jamais la base. Il propose des appels d'outils ; le backend app
 | Agent | DeepSeek tool calling, mode `simulated` sans réseau |
 | Déploiement | Docker Compose, Nginx, healthchecks |
 
-## Démarrage rapide
+---
+
+## Démarrer
 
 ```bash
 git clone https://github.com/khadimmbaye0/calme.git
@@ -108,7 +139,7 @@ Le script crée `.env` si nécessaire, génère les secrets locaux, construit la
 Ouvrir **<http://localhost:5173>**. Compte local : `local@calme.invalid`.
 
 ```bash
-make up          # équivalent
+make up                  # équivalent
 docker compose down
 docker compose down -v   # supprime aussi les données locales
 ```
@@ -116,7 +147,7 @@ docker compose down -v   # supprime aussi les données locales
 Seul le port frontend est publié ; PostgreSQL et Spring restent sur le réseau Compose. Le port `FRONTEND_PORT` vaut `5173` par défaut.
 
 <details>
-<summary>Configuration manuelle et développement</summary>
+<summary>Développement manuel</summary>
 
 ```bash
 cp .env.example .env
@@ -144,43 +175,7 @@ L'API détaillée et les exemples `curl` sont dans [`docs/API.md`](docs/API.md).
 
 </details>
 
-<details>
-<summary>Voir l'écran de connexion</summary>
-
-<img src="docs/screenshots/login.png" alt="Écran de connexion Calme" width="720">
-
-</details>
-
-## Agent et DeepSeek
-
-L'agent est accessible par l'onglet **Agent**, sélectionné par défaut. Il utilise le tool calling DeepSeek : le modèle propose, le backend décide.
-
-| Domaine | Outils |
-|---|---|
-| Calendrier | `calendar_list` · `calendar_create` · `calendar_update` · `calendar_delete` |
-| Tâches | `task_list` · `task_create` · `task_start` · `task_complete` · `task_defer` |
-| Projets | `project_list` · `project_plan` |
-| Énergie / Maintenant | `energy_set` · `now_get` |
-| Journal | `journal_list` · `journal_undo` |
-
-```text
-Vous  ·  Ajoute un cours demain de 9h à 10h.
-Calme ·  C'est ajouté. Je te propose de garder la matinée libre après.
-```
-
-Une suppression d'événement est toujours confirmée. Un plan de projet qui touche plus de 10 éléments aussi. Le backend ne valide l'action qu'après confirmation et la journalise avec son inverse.
-
-### Activer DeepSeek
-
-Sans clé, l'application démarre en mode `simulated` et ne fait aucun appel réseau. Pour le mode réel, dans `.env` :
-
-```bash
-DEEPSEEK_API_KEY=<votre-clé>
-CALME_LLM_MODE=deepseek
-DEEPSEEK_MODEL=deepseek-flash
-```
-
-La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/AGENT_CONTRACT.md`](docs/AGENT_CONTRACT.md).
+---
 
 ## Sécurité et données
 
@@ -190,6 +185,8 @@ La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/A
 - Les secrets restent dans `.env` (ignoré, mode `600`) et ne sont jamais intégrés aux images.
 - En mode DeepSeek, le message, la date, le bloc, l'énergie et les données nécessaires aux outils transitent par l'API. Pas de mot de passe, secret ou donnée d'entreprise.
 - Le mode `simulated` reste disponible pour développer sans réseau.
+
+---
 
 ## Tests et qualité
 
@@ -202,30 +199,7 @@ La clé reste dans `.env`, ignoré par Git. Le contrat complet est dans [`docs/A
 
 Les tests backend utilisent Testcontainers PostgreSQL ; les tests frontend Vitest et Testing Library. La CI vérifie chaque pull request, ainsi que GitGuardian.
 
-## Structure
-
-```text
-backend/src/main/java/com/calme/
-  agent/       boucle LLM, outils, confirmations, messages
-  calendar/    événements, conflits, disponibilités
-  tasks/       tâches et états
-  projects/    projets, dépendances, buffer, planification
-  planner/     règles de capacité et écran Maintenant
-  journal/     actions, inverses et undo
-  graph/       nœuds et relations en lecture seule
-  energy/      énergie déclarée
-  blocks/      blocs d'alternance
-  auth/ user/  session locale et compte unique
-
-frontend/src/
-  components/  AgentPanel, CalendarScreen, NowPanel, Projects, Journal, KnowledgeGraphPanel
-  api/         client typé (dont graph.ts)
-  lib/         dates, helpers et layout du graphe
-
-docs/          spec, décisions, contrat agent, API, graphe, design
-scripts/       up.sh, validate_fixtures.py
-compose.yaml
-```
+---
 
 ## Roadmap
 
@@ -236,6 +210,7 @@ compose.yaml
 - [x] Projets, dépendances et buffer
 - [x] Journal et annulation
 - [x] Agent conversationnel DeepSeek
+- [x] Graphe de connaissance
 - [x] Interface minimaliste et responsive
 - [x] Déploiement en une commande
 - [ ] Digest quotidien
@@ -243,6 +218,8 @@ compose.yaml
 - [ ] Import/édition des blocs d'alternance
 - [ ] Évaluation des 20 variantes de commandes
 - [ ] Rate limiting de l'agent et sauvegardes
+
+---
 
 ## Documentation
 
@@ -257,7 +234,8 @@ compose.yaml
 | [`docs/PLAN.md`](docs/PLAN.md) | Plan de livraison |
 | [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Questions encore ouvertes |
 | [`docs/DESIGN_TOKENS.md`](docs/DESIGN_TOKENS.md) | Palette, typographie et règles visuelles |
+| [`docs/MOTION.md`](docs/MOTION.md) | Storyboard, son et fabrication du film |
 
 <div align="center">
-  <sub>Calme — projet personnel. Les captures utilisent des données de démonstration.</sub>
+  <sub>Calme — projet personnel. Captures et film réalisés avec des données de démonstration.</sub>
 </div>
