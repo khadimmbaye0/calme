@@ -203,6 +203,40 @@ describe('CalendarScreen', () => {
     expect(screen.getByText(/rien de prévu/i)).toBeInTheDocument()
   })
 
+  it('ouvre le graphe de connaissance depuis l’onglet', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).includes('/api/now')) {
+        return response(REST_NOW)
+      }
+      if (String(input).includes('/api/graph')) {
+        return response({
+          nodes: [
+            {
+              id: 'project:1',
+              type: 'PROJECT',
+              label: 'Mémoire',
+              subtitle: '30 nov. · 0/1 étapes',
+              status: 'ACTIVE',
+              weight: 3.4,
+            },
+          ],
+          edges: [],
+        })
+      }
+      return response([])
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderCalendar()
+    await screen.findByText(/rien de prévu/i)
+    fireEvent.click(screen.getByRole('tab', { name: 'Graphe' }))
+
+    expect(await screen.findByRole('heading', { name: 'Le fil de tout.' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Projet : Mémoire' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Graphe' })).toHaveAttribute('aria-selected', 'true')
+    expect(fetchMock.mock.calls.some(([input]) => String(input).includes('/api/graph'))).toBe(true)
+  })
+
   it('se déconnecte et prévient le parent', async () => {
     const onLoggedOut = vi.fn()
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
